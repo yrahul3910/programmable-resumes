@@ -1,0 +1,7 @@
+SPECFILE_NAME = "Specfile"
+
+
+with open(SPECFILE_NAME, "r") as f:
+    specfile = f.readlines()
+
+

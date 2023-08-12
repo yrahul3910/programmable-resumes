@@ -39,10 +39,12 @@ A `data.json` file must be defined with the following spec:
   "employment": [{
     "organization": string,
     "location": string,
-    "position": string,
-    "dates": string,
-    "details": string[],
-    "tags": string[]?
+    "positions": [{
+      "position": string,
+      "dates": string,
+      "details": string[],
+      "tags": string[]?
+    }]
   }],
   "projects": [{
     "title": string,
@@ -52,11 +54,10 @@ A `data.json` file must be defined with the following spec:
       "display": string,
       "url": string
     }]?,
-    "details": string[]
+    "details": string[],
+    "tags": string[]?
   }],
-  "publications": [{
-    "latex": string
-  }],
+  "publications": string[],
   "skills": [{
     "name": string,
     "type": string
@@ -118,7 +119,7 @@ You can also use the `INCLUDE` command to include Python code. The command will 
 PARSE projects max=5 role={role}
 ```
 
-where `role` is a variable that has been defined at some point.
+where `role` is a variable that has been defined at some point. Within Python files that you write, you can write out to the final LaTeX file using a `outFile` object.
 
 ## Developer Guide
 

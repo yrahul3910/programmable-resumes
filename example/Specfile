@@ -1,0 +1,19 @@
+VERSION 1.0
+
+INCLUDE preamble.tex
+SET master=True
+INCLUDE computeRole.py
+
+PARSE education
+PARSE employment
+
+if ml:
+    PARSE publications
+    PARSE funding
+    PARSE service
+
+PARSE honors
+
+if sde:
+    PARSE projects
+    PARSE skills

@@ -1,7 +1,150 @@
+import os
+
 SPECFILE_NAME = "Specfile"
+COMMANDS = [
+    "VERSION",
+    "INCLUDE",
+    "SET",
+    "PARSE"
+]
+
+line_num = 1
+indentation = 0.
+indent_type = None
+out_file = open("tmp.py", "w")
 
 
-with open(SPECFILE_NAME, "r") as f:
-    specfile = f.readlines()
+def get_indentation(line: str) -> None:
+    """Gets the indentation of a line."""
+    global indentation, indent_type, line_num
+
+    indentation = 0
+
+    for char in line:
+        if (char == " " and indent_type == "tabs") or (char == "\t" and indent_type == "spaces"):
+            raise IndentationError(f"L{line_num}: Mixed tabs and spaces are not allowed.")
+
+        if char == " ":
+            indent_type = "spaces"
+            indentation += .25
+        elif char == "\t":
+            indent_type = "tabs"
+            indentation += 1
+        else:
+            break
 
 
+def print_indentation() -> None:
+    """Prints the indentation of a line."""
+    global indentation, indent_type, line_num, out_file
+
+    if indent_type == "spaces":
+        out_file.write(" " * int(4 * indentation))
+    elif indent_type == "tabs":
+        out_file.write("\t" * int(indentation))
+
+
+def get_indent_string(extra: int = 0) -> str:
+    """Returns the indentation of a line."""
+    global indentation, indent_type, line_num
+
+    if indent_type == "spaces":
+        return " " * int(4 * (indentation + extra))
+    elif indent_type == "tabs":
+        return "\t" * int(indentation + extra)
+    else:
+        if extra == 0:
+            return ""
+        else:
+            indent_type = "spaces"
+            indentation = 1
+            return "    "
+
+
+def _main():
+    global line_num, indentation, indent_type
+
+    specs = list.str`cat {SPECFILE_NAME}`
+    cur_version = 1.0
+
+    # Parse version
+    if not specs[0].startswith("VERSION"):
+        raise SyntaxError(f"First line of specfile must be a VERSION command, got {specs[0]}")
+
+    version = float(specs[0].split()[1])
+    if cur_version < version:
+        raise RuntimeError("Current version is less than the version in the specfile.")
+
+    # Parse the rest of the file
+    first_parse = False  # is this the first PARSE argument?
+    out_file.write("outFile = open(\"main.tex\", \"w\")\n")
+
+    for line in specs[1:]:
+        line_num += 1
+        get_indentation(line)
+
+        if line.strip() == "":
+            continue
+        
+        print(f"Processing {line}")
+
+        command = line.split()[0]
+        if command not in COMMANDS:
+            # Parse it as Python code
+            out_file.writelines([line + "\n"])
+        elif command == "PARSE":
+            if len(line.split()) < 2:
+                raise SyntaxError(f"L{line_num}: PARSE command must have a file name.")
+            
+            if not first_parse:
+                first_parse = True
+                # Write preamble
+                # TODO: If first PARSE is under an if that evaluates to false, this is never written.
+                out_file.writelines([
+                    "from spec import DataParser\n\n\n",
+                    get_indent_string() + "parser = DataParser(outFile, globals() | locals())\n",
+                    get_indent_string() + "outFile.writelines([r\"\\begin{document}\"])\n"
+                ])
+
+            args = line.split()[1:]
+            # TODO: Implement argument passing
+            out_file.write(get_indent_string() + f"parser.parse_{args[0]}()\n")
+        elif command == "SET":
+            if len(line.split()) < 2:
+                raise SyntaxError(f"L{line_num}: SET command must have a variable name and a value.")
+            
+            args = line.split("SET")[1]
+            print_indentation()
+            out_file.write(args.strip() + "\n")
+        elif command == "INCLUDE":
+            if len(line.split()) < 2:
+                raise SyntaxError(f"L{line_num}: INCLUDE command must have a file name.")
+
+            args = line.split("INCLUDE")[1]
+            print_indentation()
+
+            if args.strip().endswith("tex"):
+                out_file.writelines([
+                    get_indent_string() + f"with open(\"{args.strip()}\") as f:\n",
+                    get_indent_string(1) + f"lines = f.readlines()\n",
+                    get_indent_string() + f"outFile.writelines(lines)\n",
+                ])
+            elif args.strip().endswith("py"):
+                lines = list.str`cat {args}`
+                lines = [get_indent_string() + line + "\n" for line in lines]
+                out_file.writelines(lines)
+            else:
+                raise ValueError(f"L{line_num}: Cannot INCLUDE file that is not .tex or .py, got '{args[0]}'")
+            
+        elif command == "VERSION":
+            raise SyntaxError(f"L{line_num}: Cannot use VERSION command here.")
+
+    out_file.writelines([
+        "outFile.writelines([\"\\end{document}\"])\n",
+        "outFile.close()\n"
+    ])
+    out_file.close()
+
+
+if __name__ == "__main__":
+    _main()

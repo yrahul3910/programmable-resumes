@@ -1,5 +1,7 @@
 out.py
 tmp.py
+main.tex
 build/
+__pycache__/
 progres.egg-info/
 .DS_Store

@@ -145,6 +145,10 @@ def _main():
     ])
     out_file.close()
 
+    if False:
+        `python3 tmp.py`
+        `pdflatex main.tex`
+
 
 if __name__ == "__main__":
     _main()

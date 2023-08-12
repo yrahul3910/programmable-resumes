@@ -48,7 +48,8 @@
             "details": [
                 "Developed a full-stack system to publish announcements in socrecards used by delivery service partners (DSPs).",
                 "\\textbf{Technology:} React/Redux, TypeScript, Redux Saga, DyanmoDB, Java Spring"
-            ]
+            ],
+            "tags": ["sde"]
         }]
     }, {
         "organization": "North Carolina State University",
@@ -133,6 +134,9 @@
             "display": "App Store",
             "url": "https://apps.apple.com/us/app/nearconnect/id1547157546"
         }],
+        "details": [
+            "iOS app to connect with people nearby using multicast peer-to-peer connections."
+        ],
         "tags": ["sde"]
     }, {
         "title": "Personalized Chatbot",
@@ -181,6 +185,9 @@
             "display": "Softpedia",
             "url": "https://www.softpedia.com/get/Office-tools/Diary-Organizers-Calendar/JournalBear.shtml"
         }],
+        "details": [
+            "Cross-platform journal application with AES-256 encryption. Rated 4/5 by Softpedia."
+        ],
         "tags": ["sde"]
     }, {
         "title": "Results Scraper",
@@ -201,7 +208,11 @@
         "links": [{
             "display": "GitHub",
             "url": "https://github.com/yrahul3910/video-sharing-site"
-        }]
+        }],
+        "details": [
+            "Simplified implementation of a video-sharing website with subscriptions and custom searching."
+        ],
+        "tags": ["sde"]
     }, {
         "title": "Xtreme Calculations",
         "dates": "Apr 2013 - Oct 2017",
@@ -296,7 +307,7 @@
         "title": "Google Cloud Champion Innovator"
     }],
     "funding": [{
-        "amount": "$5,000",
+        "amount": "\\$5,000",
         "title": "Google Cloud Academic Research Grant",
         "date": "2022"
     }],

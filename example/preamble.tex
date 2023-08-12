@@ -11,26 +11,6 @@
 \usepackage[pdftex]{hyperref}
 \usepackage{fancyhdr}
 
-% Higher level conditionals
-\newif \ifsoftware
-\newif \ifmaster
-
-% Base conditionals
-\newif \ifml
-
-% How to use these conditionals:
-% - For a master CV, set \mastertrue.
-% - For a ML Engineer/Data Scientist CV, set \masterfalse, and \mltrue
-% - For a Software Developer CV, set \masterfalse, \softwaretrue
-% - For a Web Developer CV, set \masterfalse, \webdevtrue
-
-% Set the base conditionals
-\mlfalse
-
-% Set the higher level conditionals
-\softwarefalse
-\mastertrue
-
 % from setup.tex
 \hypersetup{
     colorlinks=true,

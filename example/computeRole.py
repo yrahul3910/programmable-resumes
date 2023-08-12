@@ -1,9 +1,6 @@
-for key in ['master', 'sde', 'ml', 'industry', 'research']:
+for key in ['master', 'sde', 'ml']:
     if key not in globals():
-        if key in ['industry', 'research']:
-            globals()[key] = True
-        else:
-            globals()[key] = False
+        globals()[key] = False
 
 if master:
     sde = True
@@ -16,7 +13,7 @@ outFile.writelines([
 ])
 
 if sde:
-    outFile.writeLines([
+    outFile.writelines([
         r'\renewcommand{\role}{Software Developer}',
         r'\rolesettrue'
     ])

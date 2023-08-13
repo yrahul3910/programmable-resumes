@@ -127,7 +127,7 @@ def _main():
                 out_file.writelines([
                     get_indent_string() + f"with open(\"{args.strip()}\") as f:\n",
                     get_indent_string(1) + f"lines = f.readlines()\n",
-                    get_indent_string() + f"outFile.writelines(lines)\n",
+                    get_indent_string() + f"outFile.writelines(lines + \\n)\n",
                 ])
             elif args.strip().endswith("py"):
                 lines = list.str`cat {args}`

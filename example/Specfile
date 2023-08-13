@@ -4,6 +4,7 @@ INCLUDE preamble.tex
 SET master=True
 INCLUDE computeRole.py
 
+PARSE personalInfo
 PARSE education
 PARSE employment
 

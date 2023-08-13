@@ -12,8 +12,8 @@ outFile.writelines([
     r'\rolesetfalse',
 ])
 
-if sde:
+if sde and not master:
     outFile.writelines([
-        r'\renewcommand{\role}{Software Developer}',
+        r'\renewcommand{\role}{ Software Developer}',
         r'\rolesettrue'
     ])

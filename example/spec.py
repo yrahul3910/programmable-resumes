@@ -18,6 +18,20 @@ class DataParser:
 
         with open("data.json", "r") as f:
             self.data = json.load(f)
+    
+    def parse_personalInfo(self):
+        info = self.data["personalInfo"]
+        self.file.write(r"\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}")
+        self.file.write("\n")
+        self.file.write(r"\textbf{\Large " + info["name"] + r"}\ifroleset,\fi \role &")
+        self.file.write("\n")
+        self.file.write(r"\href{mailto:" + info['contact']['email'] + "}{" + info["contact"]["email"] + r"} \\")
+
+        hrefs = ["\href{" + link["url"] + "}{" + link["display"] + "}" for link in info["links"]]
+        self.file.write("\n")
+        self.file.write(" :: ".join(hrefs) + f" & {info['contact']['phone']}")
+        self.file.write(r" \\ \end{tabular*}")
+        self.file.write("\n")  
 
     def parse_education(self):
         if len(self.data["education"]) == 0:
@@ -72,8 +86,16 @@ class DataParser:
                 if set(cur_tags).isdisjoint(set_tags):
                     self.file.write(rf"\resumeSubheading{{{company}}}{{{location}}}{{{position['position']}}}{{{position['dates']}}}")
                 else:
-                    self.file.write(rf"\addExtraPosition{{{company}}}{{{location}}}{{{position['position']}}}{{{position['dates']}}}")
+                    self.file.write(rf"\addExtraPosition{{{position['position']}}}{{{position['dates']}}}")
                 
+                self.file.write(r"{ \resumeItemListStart")
+                self.file.write("\n")
+
+                for detail in position["details"]:
+                    self.file.write(r"\item \small{" + detail + r" \vspace{-2pt}}")
+                    self.file.write("\n")
+
+                self.file.write(r"\resumeItemListEnd }")
                 self.file.write("\n")
 
                 for tag in cur_tags:
@@ -146,8 +168,8 @@ class DataParser:
 
         for project in self.data["projects"]:
             if any([self.vars[tag] for tag in project["tags"]]):
-                links = [rf"\href{{link['url']}}{{link['display']}}" for link in project["links"]]
-                self.file.write(rf"\resumeSubheading{{{project['title']}}}{{{project['dates']}}}{{{', '.join(project['skills'])}}}{{{':: '.join(links)}}}\projectDescription{{{project['details']}}}")
+                links = [rf"\href{{{link['url']}}}{{{link['display']}}}" for link in project["links"]]
+                self.file.write(rf"\resumeSubheading{{{project['title']}}}{{{project['dates']}}}{{{', '.join(project['skills'])}}}{{{' :: '.join(links)}}}\projectDescription{{{project['details']}}}")
                 self.file.write("\n")
 
         self.file.write("\\resumeSubHeadingListEnd\n\n")

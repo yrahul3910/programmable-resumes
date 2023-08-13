@@ -127,7 +127,7 @@ def _main():
                 out_file.writelines([
                     get_indent_string() + f"with open(\"{args.strip()}\") as f:\n",
                     get_indent_string(1) + f"lines = f.readlines()\n",
-                    get_indent_string() + f"outFile.writelines(lines + \\n)\n",
+                    get_indent_string() + f"outFile.writelines(lines + ['\\n'])\n",
                 ])
             elif args.strip().endswith("py"):
                 lines = list.str`cat {args}`
@@ -145,9 +145,7 @@ def _main():
     ])
     out_file.close()
 
-    if False:
-        `python3 tmp.py`
-        `pdflatex main.tex`
+    `sleep 1 && python3.9 tmp.py && sleep 1 && pdflatex main.tex && sleep 1 && rm main.aux main.log tmp.py main.out main.tex`
 
 
 if __name__ == "__main__":

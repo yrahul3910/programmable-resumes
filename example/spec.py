@@ -169,7 +169,21 @@ class DataParser:
         for project in self.data["projects"]:
             if any([self.vars[tag] for tag in project["tags"]]):
                 links = [rf"\href{{{link['url']}}}{{{link['display']}}}" for link in project["links"]]
-                self.file.write(rf"\resumeSubheading{{{project['title']}}}{{{project['dates']}}}{{{', '.join(project['skills'])}}}{{{' :: '.join(links)}}}\projectDescription{{{project['details']}}}")
+                self.file.write(rf"\resumeSubheading{{{project['title']}}}{{{project['dates']}}}{{{', '.join(project['skills'])}}}{{{' :: '.join(links)}}}")
+                
+                if len(project["details"]) == 1:
+                    self.file.write(rf"\projectDescription{{{project['details'][0]}}}")
+                else:
+                    self.file.write(r"{ \resumeItemListStart")
+                    self.file.write("\n")
+
+                    for detail in project["details"]:
+                        self.file.write(r"\item \small{" + detail + r" \vspace{-2pt}}")
+                        self.file.write("\n")
+
+                    self.file.write(r"\resumeItemListEnd }")
+                    self.file.write("\n")
+
                 self.file.write("\n")
 
         self.file.write("\\resumeSubHeadingListEnd\n\n")
@@ -190,7 +204,7 @@ class DataParser:
             skills[skill["type"]].append(skill["name"])
 
         for skill in skills:
-            self.file.write(rf"\item \textbf{{skill}}: {', '.join(skills[skill])}")
+            self.file.write(rf"\item \textbf{{{skill}}}: {', '.join(skills[skill])}")
             self.file.write("\n")
 
         self.file.write("\\resumeSubHeadingListEnd\n\n")

@@ -113,13 +113,7 @@ The Specfile lets you do more advanced manipulation as well. You can use a `SET`
 PARSE employment end=`datetime.datetime.now().strftime("%b %Y")`
 ```
 
-You can also use the `INCLUDE` command to include Python code. The command will process the file based on its extension. This is useful if you need to define functions or more complex logic. You can access variables using curly braces, like so:
-
-```
-PARSE projects max=5 role={role}
-```
-
-where `role` is a variable that has been defined at some point. Within Python files that you write, you can write out to the final LaTeX file using a `outFile` object.
+You can also use the `INCLUDE` command to include Python code. The command will process the file based on its extension. This is useful if you need to define functions or more complex logic. Within Python files that you write, you can write out to the final LaTeX file using a `outFile` object.
 
 ## Developer Guide
 

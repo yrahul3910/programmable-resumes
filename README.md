@@ -143,7 +143,7 @@ def parse_begin(self):
     self.file.write("\n")
 ```
 
-The Specfile lets you do more advanced manipulation as well. You can use a `SET` command to create a variable. A variable can have any type that is valid in Python, though it is recommended you stick to strings and numeric values. After all your `SET` commands, but before your `BEGIN` command, you should use the `IMPORT` command. At this point, your `DataParser` class will be imported.
+The Specfile lets you do more advanced manipulation as well. You can use a `SET` command to create a variable. A variable can have any type that is valid in Python, though it is recommended you stick to strings and numeric values. After all your `SET` commands, but before your `BEGIN` command, you should use the `IMPORT` command. At this point, your `DataParser` class will be imported. The `USE` command defines what LaTeX processor is used to create the final PDF. For example, Awesome CV requires `xelatex`. If this is not specified, `pdflatex` is used by default.
 
 You can also use the `SET` command with backticks to include Python code. For example, suppose you wanted to include today's month and year in your employment (say, as an end date). You might do something like so:
 

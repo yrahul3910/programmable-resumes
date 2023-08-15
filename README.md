@@ -25,6 +25,13 @@ progres
 
 to create your CV.
 
+### Supported Templates
+
+We currently support the following LaTeX templates. If you would like to add your template, or request support for one, please create either an issue or a PR.
+
+- [Awesome CV](https://github.com/posquit0/Awesome-CV/)
+- [LaTeX Resume Template](https://github.com/rajnikant7008/Latex-Resume-Template)
+
 ## Data file (JSON)
 
 A `data.json` file must be defined with the following spec:

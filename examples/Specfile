@@ -1,9 +1,10 @@
-VERSION 1.0
+VERSION 1.0.0
 
 INCLUDE preamble.tex
 SET ml=True
 INCLUDE computeRole.py
 
+BEGIN
 PARSE personalInfo
 PARSE education
 PARSE employment

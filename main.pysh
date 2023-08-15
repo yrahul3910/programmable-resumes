@@ -1,11 +1,14 @@
 import os
+from packaging.version import parse as parse_version
 
+CUR_VERSION = "1.0.0"
 SPECFILE_NAME = "Specfile"
 COMMANDS = [
     "VERSION",
     "INCLUDE",
     "SET",
-    "PARSE"
+    "PARSE",
+    "BEGIN"
 ]
 
 line_num = 1
@@ -65,18 +68,16 @@ def _main():
     global line_num, indentation, indent_type
 
     specs = list.str`cat {SPECFILE_NAME}`
-    cur_version = 1.0
 
     # Parse version
     if not specs[0].startswith("VERSION"):
         raise SyntaxError(f"First line of specfile must be a VERSION command, got {specs[0]}")
 
-    version = float(specs[0].split()[1])
-    if cur_version < version:
+    version = specs[0].split()[1]
+    if parse_version(CUR_VERSION) < parse_version(version):
         raise RuntimeError("Current version is less than the version in the specfile.")
 
     # Parse the rest of the file
-    first_parse = False  # is this the first PARSE argument?
     out_file.write("outFile = open(\"main.tex\", \"w\")\n")
 
     for line in specs[1:]:
@@ -92,19 +93,15 @@ def _main():
         if command not in COMMANDS:
             # Parse it as Python code
             out_file.writelines([line + "\n"])
+        elif command == "BEGIN":
+            out_file.writelines([
+                "from spec import DataParser\n\n\n",
+                get_indent_string() + "parser = DataParser(outFile, globals() | locals())\n",
+                get_indent_string() + "parser.parse_begin()\n"
+            ])
         elif command == "PARSE":
             if len(line.split()) < 2:
                 raise SyntaxError(f"L{line_num}: PARSE command must have a file name.")
-            
-            if not first_parse:
-                first_parse = True
-                # Write preamble
-                # TODO: If first PARSE is under an if that evaluates to false, this is never written.
-                out_file.writelines([
-                    "from spec import DataParser\n\n\n",
-                    get_indent_string() + "parser = DataParser(outFile, globals() | locals())\n",
-                    get_indent_string() + "outFile.writelines([r\"\\begin{document}\"])\n"
-                ])
 
             args = line.split()[1:]
             # TODO: Implement argument passing

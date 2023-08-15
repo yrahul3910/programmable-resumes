@@ -6,9 +6,24 @@ There are 3 parts:
 
 - A JSON file with all the information necessary.
 - A spec file that specifies what information goes, in what order, and other conditions such as most recent publications only.
-- A Python parser file that defines how to convert to LaTeX.
+- A Python parser file that defines how to convert to LaTeX (called a template spec file)
 
 End-users will only be expected to write a the spec file and the JSON file, while developers for templates will provide the parser file and auxiliary files (such as LaTeX class files).
+
+## Requirements
+
+- Python 3.9+
+- LaTeX installation (e.g. TeXLive)
+
+## Usage
+
+As an end-user who is writing their own CV, create a `data.json` file and a `Specfile` (both described below). Download a template, which should include a template spec file (`spec.py`), a preamble (`preamble.tex`), and any auxiliary files. Make sure you have a LaTeX installation, and that your TeX command of choice (`pdflatex`, `xelatex`, etc.) is in your PATH. Also ensure you have a Python 3.9+ installation. Run
+
+```
+progres
+```
+
+to create your CV.
 
 ## Data file (JSON)
 
@@ -64,6 +79,8 @@ A `data.json` file must be defined with the following spec:
   }],
   "honors": [{
     "date": string,
+    "location": string?,
+    "details": string?,
     "title": string
   }],
   "funding": [{
@@ -73,7 +90,8 @@ A `data.json` file must be defined with the following spec:
   }],
   "service": [{
     "title": string,
-    "details": string
+    "details": string,
+    "date": string?
   }]
 }
 ```
@@ -88,7 +106,7 @@ class DataParser:
     ...
 ```
 
-The `parse_xxx` function should read the `data.json` file and return a LaTeX string that for that section of the CV. Each of the `xxx` is one of the keys in `data.json` (example: `parse_personalInfo`)
+The `parse_xxx` function should read the `data.json` file and return a LaTeX string that for that section of the CV. Each of the `xxx` is one of the keys in `data.json` (example: `parse_personalInfo`). See the examples/ directory for examples.
 
 ## Spec File
 

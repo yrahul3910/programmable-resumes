@@ -19,6 +19,10 @@ class DataParser:
         with open("data.json", "r") as f:
             self.data = json.load(f)
     
+    def parse_begin(self):
+        self.file.write(r"\begin{document}")
+        self.file.write("\n")
+    
     def parse_personalInfo(self):
         info = self.data["personalInfo"]
         self.file.write(r"\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}")
@@ -167,7 +171,7 @@ class DataParser:
         self.file.write("\\resumeSubHeadingListStart\n")
 
         for project in self.data["projects"]:
-            if any([self.vars[tag] for tag in project["tags"]]):
+            if any([self.vars.get(tag, False) for tag in project["tags"]]):
                 links = [rf"\href{{{link['url']}}}{{{link['display']}}}" for link in project["links"]]
                 self.file.write(rf"\resumeSubheading{{{project['title']}}}{{{project['dates']}}}{{{', '.join(project['skills'])}}}{{{' :: '.join(links)}}}")
                 

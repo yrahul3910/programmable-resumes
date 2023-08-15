@@ -144,7 +144,7 @@
         "skills": ["Python", "Keras"],
         "links": [{
             "display": "GitHub",
-            "url": "https://github.com/yrahul3910/gpt-2"
+            "url": "https://github.com/yrahul3910/custom-chatbot"
         }],
         "details": [
             "Fine-tuned a GPT-2 345M model on 730k messages from Telegram logs to create a personalized chatbot."

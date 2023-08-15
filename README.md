@@ -125,6 +125,9 @@ Each Specfile starts with a `VERSION` command that defines the Specfile version 
 VERSION 1.0
 
 INCLUDE preamble.tex
+
+IMPORT
+BEGIN
 PARSE education
 PARSE employment
 PARSE honors
@@ -132,11 +135,23 @@ PARSE projects max=5
 PARSE skills
 ```
 
-The Specfile lets you do more advanced manipulation as well. You can use a `SET` command to create a variable. A variable can have any type that is valid in Python, though it is recommended you stick to strings and numeric values. You can also use the `SET` command with backticks to include Python code. For example, suppose you wanted to include today's month and year in your employment (say, as an end date). You might do something like so:
+The `BEGIN` command will call `parse_begin()` on the `DataParser` class you define. Usually, this should just write out `\begin{document}` to the file, like so:
+
+```py
+def parse_begin(self):
+    self.file.write(r"\begin{document}")
+    self.file.write("\n")
+```
+
+The Specfile lets you do more advanced manipulation as well. You can use a `SET` command to create a variable. A variable can have any type that is valid in Python, though it is recommended you stick to strings and numeric values. After all your `SET` commands, but before your `BEGIN` command, you should use the `IMPORT` command. At this point, your `DataParser` class will be imported.
+
+You can also use the `SET` command with backticks to include Python code. For example, suppose you wanted to include today's month and year in your employment (say, as an end date). You might do something like so:
 
 ```
 PARSE employment end=`datetime.datetime.now().strftime("%b %Y")`
 ```
+
+**Note:** This feature is currently not yet implemented.
 
 You can also use the `INCLUDE` command to include Python code. The command will process the file based on its extension. This is useful if you need to define functions or more complex logic. Within Python files that you write, you can write out to the final LaTeX file using a `outFile` object.
 

@@ -4,6 +4,7 @@ INCLUDE preamble.tex
 SET ml=True
 INCLUDE computeRole.py
 
+IMPORT
 BEGIN
 PARSE personalInfo
 PARSE education

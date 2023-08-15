@@ -101,7 +101,7 @@ class DataParser:
         self.file.write(r"\end{cventries}")
     
     def parse_employment(self):
-        if len(self.data["experience"]) == 0:
+        if len(self.data["employment"]) == 0:
             return
         
         self.file.write("\n")
@@ -273,6 +273,10 @@ class DataParser:
         
         self.file.write(r"\end{cvhonors}")
         self.file.write("\n")
+    
+    def parse_publications(self):
+        # Not currently supported by Awesome CV
+        pass
 
     def parse_service(self):
         if len(self.data["service"]) == 0:

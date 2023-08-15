@@ -8,7 +8,9 @@ COMMANDS = [
     "INCLUDE",
     "SET",
     "PARSE",
-    "BEGIN"
+    "BEGIN",
+    "USE",
+    "IMPORT"
 ]
 
 line_num = 1
@@ -68,6 +70,9 @@ def _main():
     global line_num, indentation, indent_type
 
     specs = list.str`cat {SPECFILE_NAME}`
+    parser = "pdflatex"  # Default
+
+    out_file.write("outFile = open(\"main.tex\", \"w\")\n")
 
     # Parse version
     if not specs[0].startswith("VERSION"):
@@ -76,10 +81,7 @@ def _main():
     version = specs[0].split()[1]
     if parse_version(CUR_VERSION) < parse_version(version):
         raise RuntimeError("Current version is less than the version in the specfile.")
-
-    # Parse the rest of the file
-    out_file.write("outFile = open(\"main.tex\", \"w\")\n")
-
+    
     for line in specs[1:]:
         line_num += 1
         get_indentation(line)
@@ -93,11 +95,17 @@ def _main():
         if command not in COMMANDS:
             # Parse it as Python code
             out_file.writelines([line + "\n"])
+        elif command == "USE":
+            if len(line.split()) < 2:
+                raise SyntaxError(f"L{line_num}: USE command must have a processor argument.")
+
+            parser = line.split()[1]
         elif command == "BEGIN":
+            out_file.write(get_indent_string() + "parser.parse_begin()\n")
+        elif command == "IMPORT":
             out_file.writelines([
-                "from spec import DataParser\n\n\n",
-                get_indent_string() + "parser = DataParser(outFile, globals() | locals())\n",
-                get_indent_string() + "parser.parse_begin()\n"
+                "from spec import DataParser\n",
+                "parser = DataParser(outFile, globals() | locals())\n",
             ])
         elif command == "PARSE":
             if len(line.split()) < 2:
@@ -142,7 +150,8 @@ def _main():
     ])
     out_file.close()
 
-    `sleep 1 && python3.9 tmp.py && sleep 1 && pdflatex main.tex && sleep 1 && rm main.aux main.log tmp.py main.out main.tex`
+    `sleep 1 && python3.9 tmp.py && sleep 1 && yes "" | {parser} main.tex`
+    `rm main.aux main.log tmp.py main.out main.tex`
 
 
 if __name__ == "__main__":

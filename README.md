@@ -17,7 +17,21 @@ End-users will only be expected to write a the spec file and the JSON file, whil
 
 ## Usage
 
-As an end-user who is writing their own CV, create a `data.json` file and a `Specfile` (both described below). Download a template, which should include a template spec file (`spec.py`), a preamble (`preamble.tex`), and any auxiliary files. Make sure you have a LaTeX installation, and that your TeX command of choice (`pdflatex`, `xelatex`, etc.) is in your PATH. Also ensure you have a Python 3.9+ installation. Run
+As an end-user who is writing their own CV, create a `data.json` file and a `Specfile` (both described below). Download a template, which should include a template spec file (`spec.py`), a preamble (`preamble.tex`), and any auxiliary files. Make sure you have a LaTeX installation, and that your TeX command of choice (`pdflatex`, `xelatex`, etc.) is in your PATH. Also ensure you have a Python 3.9+ installation. 
+
+### Installation
+
+Use `install.sh` to install the tool. This has `pysh` as a pre-requisite. [Pysh](https://github.com/yrahul3910/pysh) is a superset of Python, which allows Shell commands to be directly included in the code. This is mostly syntactic sugar. Alternatively, run
+
+```sh
+pip3 install .
+```
+
+which uses the transpiled Python code instead.
+
+### Running the tool
+
+Run
 
 ```
 progres
@@ -27,7 +41,7 @@ to create your CV.
 
 ### Supported Templates
 
-We currently support the following LaTeX templates. If you would like to add your template, or request support for one, please create either an issue or a PR.
+We currently support the following LaTeX templates. If you would like to add your template, or request support for one, please create either an issue or a PR. To use these templates, see the `examples/` folder, and copy the files. Add in your `Specfile` and `data.json`, and run `progres`. Note that Awesome CV works best with `xelatex`, so make sure your Specfile has `USE xelatex`.
 
 - [Awesome CV](https://github.com/posquit0/Awesome-CV/)
 - [LaTeX Resume Template](https://github.com/rajnikant7008/Latex-Resume-Template)
@@ -119,10 +133,12 @@ The `parse_xxx` function should read the `data.json` file and return a LaTeX str
 
 The spec file is a file called `Specfile`, and like a Dockerfile, is a series of commands. Each command performs a variety of actions, and can usually take arguments to modify behavior. 
 
-Each Specfile starts with a `VERSION` command that defines the Specfile version you are writing. Typically, you will follow this with a `INCLUDE` command to add a *preamble*, which contains custom LaTeX commands, LaTeX preambles, document class, etc. Following this, you will use several `PARSE` commands. At the first `PARSE` command, the `\begin{document}` will be inserted. Each `PARSE` command makes a call to the parser class you defined. You can pass args to these functions using a `key=value` syntax, or a `key="value"` syntax if you have spaces.
+Each Specfile starts with a `VERSION` command that defines the Specfile version you are writing. Typically, you will follow this with a `INCLUDE` command to add a *preamble*, which contains custom LaTeX commands, LaTeX preambles, document class, etc. Following this, you will use several `PARSE` commands. Each `PARSE` command makes a call to the parser class you defined. You can pass args to these functions using a `key=value` syntax, or a `key="value"` syntax if you have spaces.
+
+**Note:** The argument passing is not yet implemented.
 
 ```
-VERSION 1.0
+VERSION 1.0.0
 
 INCLUDE preamble.tex
 
@@ -159,4 +175,4 @@ You can also use the `INCLUDE` command to include Python code. The command will 
 
 This section discusses the internal working of the system. If you are not a contributor to the project, you may ignore this section.
 
-The program starts by reading the Specfile. The Specfile is used to create a main Python file, which in turn is used to create a LaTeX file. Finally, this LaTeX file is processed using the command-line. The program is powered by pysh, a superset of Python that adds Shell functionality.
+The program starts by reading the Specfile. The Specfile is used to create a main Python file, which in turn is used to create a LaTeX file. Finally, this LaTeX file is processed using the command-line. The program is powered by [pysh](https://github.com/yrahul3910/pysh), a superset of Python that adds Shell functionality. Pysh has a [VS Code extension](https://marketplace.visualstudio.com/items?itemName=RahulYedida.pysh-highlighting) for syntax highlighting.

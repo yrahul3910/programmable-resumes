@@ -159,14 +159,6 @@ def parse_begin(self):
 
 The Specfile lets you do more advanced manipulation as well. You can use a `SET` command to create a variable. A variable can have any type that is valid in Python, though it is recommended you stick to strings and numeric values. After all your `SET` commands, but before your `BEGIN` command, you should use the `IMPORT` command. At this point, your `DataParser` class will be imported. The `USE` command defines what LaTeX processor is used to create the final PDF. For example, Awesome CV requires `xelatex`. If this is not specified, `pdflatex` is used by default.
 
-You can also use the `SET` command with backticks to include Python code. For example, suppose you wanted to include today's month and year in your employment (say, as an end date). You might do something like so:
-
-```
-PARSE employment end=`datetime.datetime.now().strftime("%b %Y")`
-```
-
-**Note:** This feature is currently not yet implemented.
-
 You can also use the `INCLUDE` command to include Python code. The command will process the file based on its extension. This is useful if you need to define functions or more complex logic. Within Python files that you write, you can write out to the final LaTeX file using a `outFile` object.
 
 ## Developer Guide

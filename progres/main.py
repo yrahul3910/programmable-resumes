@@ -1,5 +1,13 @@
+import subprocess
+import os
+
+class list(list):
+    def map(self, f):
+        return list(map(f, self))
+
 import os
 from packaging.version import parse as parse_version
+
 
 CUR_VERSION = "1.0.0"
 SPECFILE_NAME = "Specfile"
@@ -69,7 +77,9 @@ def get_indent_string(extra: int = 0) -> str:
 def _main():
     global line_num, indentation, indent_type
 
-    specs = list.str`cat {SPECFILE_NAME}`
+    _ = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+    _ = [str(x) for x in _.split('\n')]
+    specs = _
     parser = "pdflatex"  # Default
 
     out_file.write("outFile = open(\"main.tex\", \"w\")\n")
@@ -135,7 +145,9 @@ def _main():
                     get_indent_string() + f"outFile.writelines(lines + ['\\n'])\n",
                 ])
             elif args.strip().endswith("py"):
-                lines = list.str`cat {args}`
+                _ = subprocess.Popen(f'cat {args}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+                _ = [str(x) for x in _.split('\n')]
+                lines = _
                 lines = [get_indent_string() + line + "\n" for line in lines]
                 out_file.writelines(lines)
             else:
@@ -150,8 +162,10 @@ def _main():
     ])
     out_file.close()
 
-    `sleep 1 && python3.9 tmp.py && sleep 1 && yes "" | {parser} main.tex`
-    `rm main.aux main.log tmp.py main.out main.tex`
+    _ = subprocess.Popen(f'sleep 1 && python3.9 tmp.py && sleep 1 && yes "" | {parser} main.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+    _
+    _ = subprocess.Popen(f'rm main.aux main.log tmp.py main.out main.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+    _
 
 
 if __name__ == "__main__":

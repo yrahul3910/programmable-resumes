@@ -1,0 +1,24 @@
+VERSION 1.0.0
+
+INCLUDE preamble.tex
+SET master=True
+SET position=""
+SET address=""
+INCLUDE computeRole.py
+
+USE xelatex
+
+IMPORT
+PARSE personalInfo
+BEGIN
+PARSE education
+PARSE employment
+
+if ml:
+    PARSE publications
+    PARSE funding
+    PARSE service
+
+PARSE honors
+PARSE projects
+PARSE skills

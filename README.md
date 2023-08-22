@@ -135,8 +135,6 @@ The spec file is a file called `Specfile`, and like a Dockerfile, is a series of
 
 Each Specfile starts with a `VERSION` command that defines the Specfile version you are writing. Typically, you will follow this with a `INCLUDE` command to add a *preamble*, which contains custom LaTeX commands, LaTeX preambles, document class, etc. Following this, you will use several `PARSE` commands. Each `PARSE` command makes a call to the parser class you defined. You can pass args to these functions using a `key=value` syntax, or a `key="value"` syntax if you have spaces.
 
-**Note:** The argument passing is not yet implemented.
-
 ```
 VERSION 1.0.0
 

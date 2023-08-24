@@ -1,4 +1,6 @@
 #!/bin/bash
-pysh main.pysh -t &&
+cd progres && 
+    pysh main.pysh -o main.py -t &&
+    cd .. && 
     pip3.9 install . &&
-    rm out.py
+    rm progres/main.py

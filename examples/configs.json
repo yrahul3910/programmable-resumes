@@ -1,0 +1,12 @@
+{
+    "version": "1.0.0",
+    "configs": {
+        "master": [
+            "master = True"
+        ],
+        "sde": [
+            "ml = False",
+            "sde = True"
+        ]
+    }
+}

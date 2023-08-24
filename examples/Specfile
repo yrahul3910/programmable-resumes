@@ -2,11 +2,15 @@ VERSION 1.0.0
 
 INCLUDE preamble.tex
 CONFIG
+SET position=""
+SET address=""
 INCLUDE computeRole.py
 
+USE xelatex
+
 IMPORT
-BEGIN
 PARSE personalInfo
+BEGIN
 PARSE education
 PARSE employment
 

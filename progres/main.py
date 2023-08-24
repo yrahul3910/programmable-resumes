@@ -6,7 +6,12 @@ class list(list):
         return list(map(f, self))
 
 import os
+import json
+
 from packaging.version import parse as parse_version
+from progres.utils.args import parse_key_value_pairs
+from progres.utils.config import check_config_exists
+from progres.utils.io import IOWrapper
 
 
 CUR_VERSION = "1.0.0"
@@ -18,13 +23,14 @@ COMMANDS = [
     "PARSE",
     "BEGIN",
     "USE",
-    "IMPORT"
+    "IMPORT",
+    "CONFIG"
 ]
 
 line_num = 1
 indentation = 0.
 indent_type = None
-out_file = open("tmp.py", "w")
+wrapper = None
 
 
 def get_indentation(line: str) -> None:
@@ -49,12 +55,12 @@ def get_indentation(line: str) -> None:
 
 def print_indentation() -> None:
     """Prints the indentation of a line."""
-    global indentation, indent_type, line_num, out_file
+    global indentation, indent_type, line_num, wrapper
 
     if indent_type == "spaces":
-        out_file.write(" " * int(4 * indentation))
+        wrapper.write_to_all(" " * int(4 * indentation))
     elif indent_type == "tabs":
-        out_file.write("\t" * int(indentation))
+        wrapper.write_to_all("\t" * int(indentation))
 
 
 def get_indent_string(extra: int = 0) -> str:
@@ -75,16 +81,34 @@ def get_indent_string(extra: int = 0) -> str:
 
 
 def _main():
-    global line_num, indentation, indent_type
+    global line_num, indentation, indent_type, wrapper
 
     _ = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
     _ = [str(x) for x in _.split('\n')]
     specs = _
-    parser = "pdflatex"  # Default
 
-    out_file.write("outFile = open(\"main.tex\", \"w\")\n")
+    configs = None
+    if check_config_exists(specs):
+        configs = json.load(open("configs.json", "r"))
 
-    # Parse version
+        if "version" not in configs:
+            raise RuntimeError("Config file must have a version key.")
+        elif parse_version(CUR_VERSION) < parse_version(configs["version"]):
+            raise RuntimeError("Current version is less than the version in the config file.")
+    else:
+        configs = { 
+            "configs": {
+                "default": [] 
+            }
+        }
+    
+    wrapper = IOWrapper(configs)
+    parser = "pdflatex"  
+
+    for config in configs["configs"]:
+        wrapper.write_to_file(config, f"outFile = open(\"{config}.tex\", \"w\")\n")
+
+    
     if not specs[0].startswith("VERSION"):
         raise SyntaxError(f"First line of specfile must be a VERSION command, got {specs[0]}")
 
@@ -103,34 +127,34 @@ def _main():
 
         command = line.split()[0]
         if command not in COMMANDS:
-            # Parse it as Python code
-            out_file.writelines([line + "\n"])
+            
+            wrapper.write_to_all(line + "\n")
         elif command == "USE":
             if len(line.split()) < 2:
                 raise SyntaxError(f"L{line_num}: USE command must have a processor argument.")
 
             parser = line.split()[1]
         elif command == "BEGIN":
-            out_file.write(get_indent_string() + "parser.parse_begin()\n")
+            wrapper.write_to_all(get_indent_string() + "parser.parse_begin()\n")
         elif command == "IMPORT":
-            out_file.writelines([
-                "from spec import DataParser\n",
-                "parser = DataParser(outFile, globals() | locals())\n",
-            ])
+            wrapper.write_to_all("from spec import DataParser\n")
+            wrapper.write_to_all("parser = DataParser(outFile, globals() | locals())\n")
         elif command == "PARSE":
             if len(line.split()) < 2:
                 raise SyntaxError(f"L{line_num}: PARSE command must have a file name.")
 
             args = line.split()[1:]
-            # TODO: Implement argument passing
-            out_file.write(get_indent_string() + f"parser.parse_{args[0]}()\n")
+            section = args[0]
+
+            rest = " ".join(args[1:])
+            wrapper.write_to_all(get_indent_string() + f"parser.parse_{section}({parse_key_value_pairs(rest)})\n")
         elif command == "SET":
             if len(line.split()) < 2:
                 raise SyntaxError(f"L{line_num}: SET command must have a variable name and a value.")
             
             args = line.split("SET")[1]
             print_indentation()
-            out_file.write(args.strip() + "\n")
+            wrapper.write_to_all(args.strip() + "\n")
         elif command == "INCLUDE":
             if len(line.split()) < 2:
                 raise SyntaxError(f"L{line_num}: INCLUDE command must have a file name.")
@@ -139,33 +163,40 @@ def _main():
             print_indentation()
 
             if args.strip().endswith("tex"):
-                out_file.writelines([
+                _lines = [
                     get_indent_string() + f"with open(\"{args.strip()}\") as f:\n",
                     get_indent_string(1) + f"lines = f.readlines()\n",
                     get_indent_string() + f"outFile.writelines(lines + ['\\n'])\n",
-                ])
+                ]
+
+                for x in _lines:
+                    wrapper.write_to_all(x)
             elif args.strip().endswith("py"):
                 _ = subprocess.Popen(f'cat {args}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
                 _ = [str(x) for x in _.split('\n')]
                 lines = _
                 lines = [get_indent_string() + line + "\n" for line in lines]
-                out_file.writelines(lines)
+                
+                for line in lines:
+                    wrapper.write_to_all(line)
             else:
                 raise ValueError(f"L{line_num}: Cannot INCLUDE file that is not .tex or .py, got '{args[0]}'")
-            
+        elif command == "CONFIG":
+            for config in configs["configs"]:
+                for command in configs["configs"][config]:
+                    wrapper.write_to_file(config, command + "\n")
         elif command == "VERSION":
             raise SyntaxError(f"L{line_num}: Cannot use VERSION command here.")
 
-    out_file.writelines([
-        "outFile.writelines([\"\\end{document}\"])\n",
-        "outFile.close()\n"
-    ])
-    out_file.close()
+    wrapper.write_to_all("outFile.writelines([\"\\end{document}\"])\n")
+    wrapper.write_to_all("outFile.close()\n")
+    wrapper.close_all_files()
 
-    _ = subprocess.Popen(f'sleep 1 && python3.9 tmp.py && sleep 1 && yes "" | {parser} main.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
-    _
-    _ = subprocess.Popen(f'rm main.aux main.log tmp.py main.out main.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
-    _
+    for config in configs["configs"]:
+        _ = subprocess.Popen(f'sleep 1 && python3.9 {config}.py && sleep 1 && yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+        _
+        _ = subprocess.Popen(f'rm {config}.aux {config}.log {config}.py {config}.out {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+        _
 
 
 if __name__ == "__main__":

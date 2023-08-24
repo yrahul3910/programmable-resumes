@@ -14,7 +14,7 @@ from progres.utils.config import check_config_exists
 from progres.utils.io import IOWrapper
 
 
-CUR_VERSION = "1.0.0"
+CUR_VERSION = "2.0.0"
 SPECFILE_NAME = "Specfile"
 COMMANDS = [
     "VERSION",

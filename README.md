@@ -2,9 +2,10 @@
 
 This project implements programmable resumes, a modular approach to defining a resume. This allows users to customize exactly what information goes in their CV for different roles, while preserving all the data about past projects, employments, etc.
 
-There are 3 parts:
+There are 4 parts:
 
-- A JSON file with all the information necessary.
+- A data JSON file with all the information necessary (called the data file).
+- A config JSON file that contains code executed for different variants of your CV (optional)
 - A spec file that specifies what information goes, in what order, and other conditions such as most recent publications only.
 - A Python parser file that defines how to convert to LaTeX (called a template spec file)
 
@@ -17,7 +18,13 @@ End-users will only be expected to write a the spec file and the JSON file, whil
 
 ## Usage
 
+### End-users
+
 As an end-user who is writing their own CV, create a `data.json` file and a `Specfile` (both described below). Download a template, which should include a template spec file (`spec.py`), a preamble (`preamble.tex`), and any auxiliary files. Make sure you have a LaTeX installation, and that your TeX command of choice (`pdflatex`, `xelatex`, etc.) is in your PATH. Also ensure you have a Python 3.9+ installation. 
+
+### Template developers
+
+As a template developer, you are expected to publish a template spec file, along with any auxiliary files your template might need. Typically, this will include a preamble of some sort and a LaTeX class file. You may also include auxiliary files as necessary. You should also include a `README.md` file that describes how to use your template. See the `examples/` directory for two examples.
 
 ### Installation
 
@@ -117,7 +124,7 @@ A `data.json` file must be defined with the following spec:
 }
 ```
 
-## Python Parser File
+## Template Spec File
 
 A `spec.py` file should be defined. It must have the following structure:
 
@@ -160,6 +167,23 @@ def parse_begin(self):
 The Specfile lets you do more advanced manipulation as well. You can use a `SET` command to create a variable. A variable can have any type that is valid in Python, though it is recommended you stick to strings and numeric values. After all your `SET` commands, but before your `BEGIN` command, you should use the `IMPORT` command. At this point, your `DataParser` class will be imported. The `USE` command defines what LaTeX processor is used to create the final PDF. For example, Awesome CV requires `xelatex`. If this is not specified, `pdflatex` is used by default.
 
 You can also use the `INCLUDE` command to include Python code. The command will process the file based on its extension. This is useful if you need to define functions or more complex logic. Within Python files that you write, you can write out to the final LaTeX file using a `outFile` object.
+
+## Config file
+
+The config file is optional, and used in conjunction with the `CONFIG` command in the `Specfile`. The config file is a file named `configs.json`, that has the following structure:
+
+```json
+{
+  "version": string,
+  "configs: {
+    "configName": string[]
+  }
+}
+```
+
+The version key contains the `progres` version you're using. Because this feature was implemented in version 2.0.0, this should be the minimum version. The `configs` key contains a mapping of config names to a list of Python statements. This is best used in conjunction with the tags defined in your `data.json` file. Since `progres` will only include projects and employment based on tags (which are set as Python variables), this is the perfect place to define those configs. In the `examples/` directory, you'll see an example of this.
+
+In your `Specfile`, add the `CONFIG` command where you want these Python statements to be executed. Almost always, you want these to be before any `PARSE` commands. In a future version, multiple config JSON files will be supported for even greater flexibility.
 
 ## Developer Guide
 

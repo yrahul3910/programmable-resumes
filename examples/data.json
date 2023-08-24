@@ -73,6 +73,18 @@
         }]
     }],
     "projects": [{
+        "title": "Programmable Resumes",
+        "dates": "Aug 2023 - Present",
+        "skills": ["Python"],
+        "links": [{
+            "display": "GitHub",
+            "url": "https://github.com/yrahul3910/programmable-resumes"
+        }],
+        "details": [
+            "Developed a specification and implementation for modular, customizable resumes with support for two popular LaTeX templates."
+        ],
+        "tags": ["sde"]
+    }, {
         "title": "pysh",
         "dates": "May 2021 - Present",
         "skills": ["C++", "TMLanguage"],

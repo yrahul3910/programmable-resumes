@@ -9,6 +9,9 @@
         ],
         "ml": [
             "ml = True"
+        ],
+        "academic": [
+            "academic = True"
         ]
     }
 }

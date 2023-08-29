@@ -16,5 +16,8 @@ if ml:
     PARSE service
 
 PARSE honors
-PARSE projects
+
+if not academic:
+    PARSE projects
+
 PARSE skills

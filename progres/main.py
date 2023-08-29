@@ -7,6 +7,8 @@ class list(list):
 
 import os
 import json
+import multiprocessing as mp
+import multiprocessing.pool
 
 from packaging.version import parse as parse_version
 from progres.utils.args import parse_key_value_pairs
@@ -192,12 +194,18 @@ def _main():
     wrapper.write_to_all("outFile.close()\n")
     wrapper.close_all_files()
 
-    for config in configs["configs"]:
+    
+    cpu_count = mp.cpu_count()
+
+    def f(config):
         print(f"Compiling config: {config}")
         _ = subprocess.Popen(f'sleep 1 && python3.9 {config}.py && sleep 1 && yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
         _
         _ = subprocess.Popen(f'rm {config}.aux {config}.log {config}.py {config}.out {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
         _
+
+    with multiprocessing.pool.ThreadPool(processes=cpu_count) as pool:
+        pool.map(f, [config for config in configs["configs"].keys()])
     
     print("Done!")
 

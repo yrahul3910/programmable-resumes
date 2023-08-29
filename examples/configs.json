@@ -2,15 +2,19 @@
     "version": "2.0.0",
     "configs": {
         "master": [
-            "master = True"
+            "master = True",
+            "academic = False"
         ],
         "sde": [
-            "sde = True"
+            "sde = True",
+            "academic = False"
         ],
         "ml": [
-            "ml = True"
+            "ml = True",
+            "academic = False"
         ],
         "academic": [
+            "ml = True",
             "academic = True"
         ]
     }

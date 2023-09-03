@@ -1,5 +1,6 @@
 import os
 import json
+import argparse
 import multiprocessing as mp
 import multiprocessing.pool
 
@@ -77,6 +78,9 @@ def get_indent_string(extra: int = 0) -> str:
 
 def _main():
     global line_num, indentation, indent_type, wrapper
+
+    parser = argparse.ArgumentParser(description="Progres: Programmable Resumes.")
+    parser.add_argument("--output", "-o", type=str, default="./out", help="Output directory")
 
     specs = list.str`cat {SPECFILE_NAME}`
 
@@ -190,6 +194,7 @@ def _main():
         print(f"Compiling config: {config}")
         `sleep 1 && python3.9 {config}.py && sleep 1 && yes "" | {parser} {config}.tex`
         `rm {config}.aux {config}.log {config}.py {config}.out {config}.tex`
+        `mkdir -p {args.output} && mv {config}.pdf {args.output}/`
 
     with multiprocessing.pool.ThreadPool(processes=cpu_count) as pool:
         pool.map(f, [config for config in configs["configs"].keys()])

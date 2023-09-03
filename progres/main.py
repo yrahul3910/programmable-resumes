@@ -7,6 +7,7 @@ class list(list):
 
 import os
 import json
+import argparse
 import multiprocessing as mp
 import multiprocessing.pool
 
@@ -84,6 +85,9 @@ def get_indent_string(extra: int = 0) -> str:
 
 def _main():
     global line_num, indentation, indent_type, wrapper
+
+    parser = argparse.ArgumentParser(description="Progres: Programmable Resumes.")
+    parser.add_argument("--output", "-o", type=str, default="./out", help="Output directory")
 
     _ = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
     _ = [str(x) for x in _.split('\n')]
@@ -202,6 +206,8 @@ def _main():
         _ = subprocess.Popen(f'sleep 1 && python3.9 {config}.py && sleep 1 && yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
         _
         _ = subprocess.Popen(f'rm {config}.aux {config}.log {config}.py {config}.out {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+        _
+        _ = subprocess.Popen(f'mkdir -p {args.output} && mv {config}.pdf {args.output}/', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
         _
 
     with multiprocessing.pool.ThreadPool(processes=cpu_count) as pool:

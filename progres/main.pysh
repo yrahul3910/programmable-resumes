@@ -81,6 +81,7 @@ def _main():
 
     parser = argparse.ArgumentParser(description="Progres: Programmable Resumes.")
     parser.add_argument("--output", "-o", type=str, default="./out", help="Output directory")
+    sys_args = parser.parse_args()
 
     specs = list.str`cat {SPECFILE_NAME}`
 
@@ -194,7 +195,7 @@ def _main():
         print(f"Compiling config: {config}")
         `sleep 1 && python3.9 {config}.py && sleep 1 && yes "" | {parser} {config}.tex`
         `rm {config}.aux {config}.log {config}.py {config}.out {config}.tex`
-        `mkdir -p {args.output} && mv {config}.pdf {args.output}/`
+        `mkdir -p {sys_args.output} && mv {config}.pdf {sys_args.output}/`
 
     with multiprocessing.pool.ThreadPool(processes=cpu_count) as pool:
         pool.map(f, [config for config in configs["configs"].keys()])

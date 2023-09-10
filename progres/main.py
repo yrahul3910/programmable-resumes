@@ -88,6 +88,7 @@ def _main():
 
     parser = argparse.ArgumentParser(description="Progres: Programmable Resumes.")
     parser.add_argument("--output", "-o", type=str, default="./out", help="Output directory")
+    sys_args = parser.parse_args()
 
     _ = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
     _ = [str(x) for x in _.split('\n')]
@@ -207,7 +208,7 @@ def _main():
         _
         _ = subprocess.Popen(f'rm {config}.aux {config}.log {config}.py {config}.out {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
         _
-        _ = subprocess.Popen(f'mkdir -p {args.output} && mv {config}.pdf {args.output}/', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+        _ = subprocess.Popen(f'mkdir -p {sys_args.output} && mv {config}.pdf {sys_args.output}/', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
         _
 
     with multiprocessing.pool.ThreadPool(processes=cpu_count) as pool:

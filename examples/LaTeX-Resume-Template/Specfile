@@ -1,4 +1,4 @@
-VERSION 2.0.0
+VERSION 3.0.0
 
 INCLUDE preamble.tex
 CONFIG
@@ -12,12 +12,12 @@ PARSE employment
 
 if ml:
     PARSE publications
+
+    if not academic:
+        PARSE projects
+
     PARSE funding
     PARSE service
 
 PARSE honors
-
-if not academic:
-    PARSE projects
-
 PARSE skills

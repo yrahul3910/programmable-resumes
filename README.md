@@ -55,10 +55,11 @@ We currently support the following LaTeX templates. If you would like to add you
 
 ## Data file (JSON)
 
-A `data.json` file must be defined with the following spec:
+A `data.json` file must be defined with the following spec. Note that dates must be in ISO-8601 format (YYYY-MM-DD). If you wish to denote the present, use null instead. Writers of templates must include checks to ensure that null dates are handled correctly.
 
 ```json
 {
+  "version": string,
   "personalInfo": {
     "name": string,
     "suffix": string?,
@@ -76,7 +77,7 @@ A `data.json` file must be defined with the following spec:
     "institution": string,
     "location": string,
     "degree": string,
-    "dates": string,
+    "dates": string[],
     "details": string[]?
   }],
   "employment": [{
@@ -84,14 +85,14 @@ A `data.json` file must be defined with the following spec:
     "location": string,
     "positions": [{
       "position": string,
-      "dates": string,
+      "dates": string[],
       "details": string[],
       "tags": string[]?
     }]
   }],
   "projects": [{
     "title": string,
-    "dates": string,
+    "dates": string[],
     "skills": string[],
     "links": [{
       "display": string,
@@ -106,7 +107,7 @@ A `data.json` file must be defined with the following spec:
     "type": string
   }],
   "honors": [{
-    "date": string,
+    "date": string[],
     "location": string?,
     "details": string?,
     "title": string

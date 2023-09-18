@@ -1,11 +1,14 @@
 import os
 import json
+from datetime import datetime
+from packaging.version import parse as parse_version
 
 
 class DataParser:
     """
     Template spec file for Awesome CV. Expects a `position` and `address` variable to be set.
     """
+    VERSION = "3.0.0"
 
     def __init__(self, file, vars):
         self.file = file
@@ -16,6 +19,32 @@ class DataParser:
 
         with open("data.json", "r") as f:
             self.data = json.load(f)
+        
+        if "version" not in self.data:
+            raise RuntimeError("data.json missing version")
+
+        if parse_version(self.data["version"]) > parse_version(self.VERSION):
+            raise RuntimeError("data.json version is newer than spec.py version")
+    
+    def _get_str_from_date(self, date):
+        try:
+            return datetime.fromisoformat(date).strftime("%b %Y")
+        except TypeError:
+            return "Unknown"
+    
+    def _get_str_from_dates(self, dates):
+        [start, end] = dates
+        try:
+            start = datetime.fromisoformat(start).strftime("%b %Y")
+        except TypeError:
+            start = "Present"
+        
+        try:
+            end = datetime.fromisoformat(end).strftime("%b %Y")
+        except TypeError:
+            end = "Present"
+        
+        return f"{start} - {end}"
     
     def parse_begin(self):
         self.file.write(r"\begin{document}")
@@ -71,7 +100,7 @@ class DataParser:
             school = entry["institution"]
             location = entry["location"]
             degree = entry["degree"]
-            dates = entry["dates"]
+            dates = self._get_str_from_dates(entry["dates"])
 
             self.file.write(r"\cventry")
             self.file.write("\n")
@@ -126,7 +155,7 @@ class DataParser:
                     self.file.write("\n")
                     self.file.write(r"{" + location + r"}")
                     self.file.write("\n")
-                    self.file.write(r"{" + position["dates"] + r"}{")
+                    self.file.write(r"{" + self._get_str_from_dates(position["dates"]) + r"}{")
                     self.file.write("\n")
 
                     if "details" in position and len(position["details"]) > 0:
@@ -196,7 +225,7 @@ class DataParser:
                 links = [rf"\href{{{link['url']}}}{{{link['display']}}}" for link in entry["links"]]
                 self.file.write(r"{" + ", ".join(links) + r"}")
                 self.file.write("\n")
-                self.file.write(r"{" + entry["dates"] + r"}{")
+                self.file.write(r"{" + self._get_str_from_dates(entry["dates"]) + r"}{")
                 self.file.write("\n")
 
                 if "details" in entry and len(entry["details"]) > 0:
@@ -243,7 +272,7 @@ class DataParser:
             else:
                 self.file.write("{}")
             self.file.write("\n")
-            self.file.write(r"{" + entry["date"] + r"}")
+            self.file.write(r"{" + self._get_str_from_date(entry["date"]) + r"}")
             self.file.write("\n")
         
         self.file.write(r"\end{cvhonors}")
@@ -268,7 +297,7 @@ class DataParser:
             self.file.write("\n")
             self.file.write("{}")
             self.file.write("\n")
-            self.file.write(r"{" + entry["date"] + r"}")
+            self.file.write(r"{" + self._get_str_from_date(entry["date"]) + r"}")
             self.file.write("\n")
         
         self.file.write(r"\end{cvhonors}")
@@ -299,7 +328,7 @@ class DataParser:
             self.file.write("\n")
 
             if "date" in entry:
-                self.file.write(r"{" + entry["date"] + r"}")
+                self.file.write(r"{" + self._get_str_from_date(entry["date"]) + r"}")
             else:
                 self.file.write("{}")
             self.file.write("\n")

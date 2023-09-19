@@ -87,9 +87,11 @@ class DataParser:
         
         self.file.write("\\resumeSubHeadingListEnd\n\n")
     
-    def parse_employment(self):
+    def parse_employment(self, after_date="1970-01-01"):
         if len(self.data["employment"]) == 0:
             return
+        
+        after_date = datetime.fromisoformat(after_date)
         
         self.file.write("\n")
         self.file.write("\\section{Employment}\n")
@@ -116,9 +118,13 @@ class DataParser:
                 # Check the tags in position. If that self.vars[tag] is True, then we 
                 # include this position in the CV.
                 cur_tags = position["tags"]
-                
                 set_tags = set([tag for tag in tags if tags[tag]])
                 dates = self._get_str_from_dates(position["dates"])
+
+                # Filter out positions that ended before `after_date`
+                if dates[1] < after_date:
+                    continue
+
                 if set(cur_tags).isdisjoint(set_tags):
                     self.file.write(rf"\resumeSubheading{{{company}}}{{{location}}}{{{position['position']}}}{{{dates}}}")
                 else:
@@ -196,7 +202,7 @@ class DataParser:
 
         self.file.write("\\resumeSubHeadingListEnd\n\n")
     
-    def parse_projects(self):
+    def parse_projects(self, latest_k=999):
         if len(self.data["projects"]) == 0:
             return
         
@@ -204,8 +210,21 @@ class DataParser:
         self.file.write("\\section{Relevant Projects}\n")
         self.file.write("\\resumeSubHeadingListStart\n")
 
-        for project in self.data["projects"]:
+        k = 0
+        i = 0
+
+        # Re-arrange self.data["projects"] in descending order of completion date.
+        self.data["projects"].sort(
+            key=lambda p: datetime.fromisoformat(p["dates"][1]) if p["dates"][1] is not None else datetime(3000, 1, 1),
+            reverse=True
+        )
+
+        while k < latest_k and i < len(self.data["projects"]):
+            i += 1
+
+            project = self.data["projects"][i]
             if any([self.vars.get(tag, False) for tag in project["tags"]]):
+                k += 1
                 links = [rf"\href{{{link['url']}}}{{{link['display']}}}" for link in project["links"]]
                 dates = self._get_str_from_dates(project["dates"])
                 self.file.write(rf"\resumeSubheading{{{project['title']}}}{{{dates}}}{{{', '.join(project['skills'])}}}{{{' :: '.join(links)}}}")

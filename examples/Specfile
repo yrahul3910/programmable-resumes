@@ -1,5 +1,6 @@
 VERSION 3.0.0
 
+PYTHON python3.12
 INCLUDE preamble.tex
 CONFIG
 SET position=""

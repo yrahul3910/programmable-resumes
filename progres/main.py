@@ -239,7 +239,7 @@ def _main():
         _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
         _
         
-        if EXIT_CODE != 0:
+        if EXIT_CODE != 0 and len(STDERR.strip()) > 0:
             if sys_args.debug:
                 print(f"{parser} failed:\n{STDERR}")
 

@@ -215,7 +215,7 @@ def _main():
         print(f"Compiling config: {config}")
         `sleep 1 && {python_exec} {config}.py && sleep 1 && yes "" | {parser} {config}.tex`
         
-        if EXIT_CODE != 0:
+        if EXIT_CODE != 0 and len(STDERR.strip()) > 0:
             if sys_args.debug:
                 print(f"{parser} failed:\n{STDERR}")
 

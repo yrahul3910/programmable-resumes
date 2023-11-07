@@ -59,6 +59,16 @@ def print_indentation() -> None:
         wrapper.write_to_all("\t" * int(indentation))
 
 
+def strip_comments(line: str) -> str:
+    """Strips comments from a line."""
+    global line_num
+
+    if "//" in line:
+        line = line.split("//")[0]
+    
+    return line
+
+
 def get_indent_string(extra: int = 0) -> str:
     """Returns the indentation of a line."""
     global indentation, indent_type, line_num
@@ -117,6 +127,8 @@ def _main():
     
     for line in specs[1:]:
         line_num += 1
+
+        line = strip_comments(line)
         get_indentation(line)
 
         if line.strip() == "":

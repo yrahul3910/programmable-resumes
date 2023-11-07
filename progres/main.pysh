@@ -81,6 +81,7 @@ def _main():
 
     parser = argparse.ArgumentParser(description="Progres: Programmable Resumes.")
     parser.add_argument("--output", "-o", type=str, default="./out", help="Output directory")
+    parser.add_argument("--debug", "-d", action="store_true", help="Debug mode")
     sys_args = parser.parse_args()
 
     specs = list.str`cat {SPECFILE_NAME}`
@@ -194,6 +195,13 @@ def _main():
     def f(config):
         print(f"Compiling config: {config}")
         `sleep 1 && python3 {config}.py && sleep 1 && yes "" | {parser} {config}.tex`
+        
+        if EXIT_CODE != 0:
+            if sys_args.debug:
+                print(f"{parser} failed:\n{STDERR}")
+
+            raise RuntimeError(f"Failed to compile {config}.tex: failed at the {parser} step.")
+
         `rm {config}.aux {config}.log {config}.py {config}.out {config}.tex`
         `mkdir -p {sys_args.output} && mv {config}.pdf {sys_args.output}/`
 

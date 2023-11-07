@@ -88,9 +88,14 @@ def _main():
 
     parser = argparse.ArgumentParser(description="Progres: Programmable Resumes.")
     parser.add_argument("--output", "-o", type=str, default="./out", help="Output directory")
+    parser.add_argument("--debug", "-d", action="store_true", help="Debug mode")
     sys_args = parser.parse_args()
 
-    _ = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+    proc = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc.wait()
+    EXIT_CODE = proc.returncode
+    __comm = proc.communicate()
+    _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
     _ = [str(x) for x in _.split('\n')]
     specs = _
 
@@ -179,7 +184,11 @@ def _main():
                 for x in _lines:
                     wrapper.write_to_all(x)
             elif args.strip().endswith("py"):
-                _ = subprocess.Popen(f'cat {args}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+                proc = subprocess.Popen(f'cat {args}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                proc.wait()
+                EXIT_CODE = proc.returncode
+                __comm = proc.communicate()
+                _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
                 _ = [str(x) for x in _.split('\n')]
                 lines = _
                 lines = [get_indent_string() + line + "\n" for line in lines]
@@ -204,11 +213,30 @@ def _main():
 
     def f(config):
         print(f"Compiling config: {config}")
-        _ = subprocess.Popen(f'sleep 1 && python3 {config}.py && sleep 1 && yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+        proc = subprocess.Popen(f'sleep 1 && python3 {config}.py && sleep 1 && yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc.wait()
+        EXIT_CODE = proc.returncode
+        __comm = proc.communicate()
+        _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
         _
-        _ = subprocess.Popen(f'rm {config}.aux {config}.log {config}.py {config}.out {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+        
+        if EXIT_CODE != 0:
+            if sys_args.debug:
+                print(f"{parser} failed:\n{STDERR}")
+
+            raise RuntimeError(f"Failed to compile {config}.tex: failed at the {parser} step.")
+
+        proc = subprocess.Popen(f'rm {config}.aux {config}.log {config}.py {config}.out {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc.wait()
+        EXIT_CODE = proc.returncode
+        __comm = proc.communicate()
+        _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
         _
-        _ = subprocess.Popen(f'mkdir -p {sys_args.output} && mv {config}.pdf {sys_args.output}/', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('utf-8').rstrip()
+        proc = subprocess.Popen(f'mkdir -p {sys_args.output} && mv {config}.pdf {sys_args.output}/', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc.wait()
+        EXIT_CODE = proc.returncode
+        __comm = proc.communicate()
+        _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
         _
 
     with multiprocessing.pool.ThreadPool(processes=cpu_count) as pool:

@@ -62,7 +62,7 @@ class DataParser:
         self.file.write("\n")
         self.file.write(r"\href{mailto:" + info['contact']['email'] + "}{" + info["contact"]["email"] + r"} \\")
 
-        hrefs = ["\href{" + link["url"] + "}{" + link["display"] + "}" for link in info["links"]]
+        hrefs = [r"\href{" + link["url"] + "}{" + link["display"] + "}" for link in info["links"]]
         self.file.write("\n")
         self.file.write(" :: ".join(hrefs) + f" & {info['contact']['phone']}")
         self.file.write(r" \\ \end{tabular*}")
@@ -121,9 +121,14 @@ class DataParser:
                 set_tags = set([tag for tag in tags if tags[tag]])
                 dates = self._get_str_from_dates(position["dates"])
 
-                # Filter out positions that ended before `after_date`
-                if dates[1] < after_date:
-                    continue
+                try:
+                    pos_end_date = datetime.fromisoformat(position["dates"][1])
+
+                    if pos_end_date < after_date:
+                        continue
+                except TypeError:
+                    # Probably got null, which means we should not filter
+                    pass
 
                 if set(cur_tags).isdisjoint(set_tags):
                     self.file.write(rf"\resumeSubheading{{{company}}}{{{location}}}{{{position['position']}}}{{{dates}}}")
@@ -219,10 +224,9 @@ class DataParser:
             reverse=True
         )
 
-        while k < latest_k and i < len(self.data["projects"]):
-            i += 1
-
+        while k < latest_k and i < len(self.data["projects"]) - 1:
             project = self.data["projects"][i]
+            i += 1
             if any([self.vars.get(tag, False) for tag in project["tags"]]):
                 k += 1
                 links = [rf"\href{{{link['url']}}}{{{link['display']}}}" for link in project["links"]]

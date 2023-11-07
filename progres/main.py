@@ -26,6 +26,7 @@ COMMANDS = [
     "PARSE",
     "BEGIN",
     "USE",
+    "PYTHON",
     "IMPORT",
     "CONFIG"
 ]
@@ -98,7 +99,7 @@ def _main():
 
     parser = argparse.ArgumentParser(description="Progres: Programmable Resumes.")
     parser.add_argument("--output", "-o", type=str, default="./out", help="Output directory")
-    parser.add_argument("--debug", "-d", action="store_true", help="Debug mode")
+    parser.add_argument("--debug", "-d", action="store_true", default=False, help="Debug mode")
     sys_args = parser.parse_args()
 
     proc = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -126,6 +127,7 @@ def _main():
     
     wrapper = IOWrapper(configs)
     parser = "pdflatex"  
+    python_exec = "python3"  
 
     for config in configs["configs"]:
         wrapper.write_to_file(config, f"outFile = open(\"{config}.tex\", \"w\")\n")
@@ -158,6 +160,11 @@ def _main():
                 raise SyntaxError(f"L{line_num}: USE command must have a processor argument.")
 
             parser = line.split()[1]
+        elif command == "PYTHON":
+            if len(line.split()) < 2:
+                raise SyntaxError(f"L{line_num}: PYTHON command must have a python path.")
+
+            python_exec = line.split()[1]
         elif command == "BEGIN":
             wrapper.write_to_all(get_indent_string() + "parser.parse_begin()\n")
         elif command == "IMPORT":
@@ -216,7 +223,7 @@ def _main():
         elif command == "VERSION":
             raise SyntaxError(f"L{line_num}: Cannot use VERSION command here.")
 
-    wrapper.write_to_all("outFile.writelines([\"\\end{document}\"])\n")
+    wrapper.write_to_all("outFile.writelines([r\"\\end{document}\"])\n")
     wrapper.write_to_all("outFile.close()\n")
     wrapper.close_all_files()
 
@@ -225,7 +232,7 @@ def _main():
 
     def f(config):
         print(f"Compiling config: {config}")
-        proc = subprocess.Popen(f'sleep 1 && python3 {config}.py && sleep 1 && yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(f'sleep 1 && {python_exec} {config}.py && sleep 1 && yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         proc.wait()
         EXIT_CODE = proc.returncode
         __comm = proc.communicate()

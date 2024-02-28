@@ -1,25 +1,35 @@
-VERSION 3.0.0
+VERSION 3.1.0
 
 PYTHON python3.12
+
 INCLUDE preamble.tex
 CONFIG
-SET position=""
-SET address=""
 INCLUDE computeRole.py
 
-USE xelatex
-
 IMPORT
-PARSE personalInfo
 BEGIN
+PARSE personalInfo
 PARSE education
-PARSE employment
+
+if not master:
+  PARSE employment after_date="2020-01-01"
+else:
+  PARSE employment
 
 if ml:
-    PARSE publications
+    if not academic and not master:
+        PARSE publications latest_k=5
+    else:
+        PARSE publications
     PARSE funding
     PARSE service
 
 PARSE honors
-PARSE projects
+PARSE talks
+
+if not academic and not master:
+    PARSE projects latest_k=5
+elif not academic and master:
+    PARSE projects
+
 PARSE skills

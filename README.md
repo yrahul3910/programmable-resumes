@@ -109,6 +109,12 @@ A `data.json` file must be defined with the following spec. Note that dates must
     "tags": string[]?
   }],
   "publications": string[],
+  "talks": [{
+    "title": string,
+    "event": string,
+    "date": string,
+    "location": string
+  }],
   "skills": [{
     "name": string,
     "type": string

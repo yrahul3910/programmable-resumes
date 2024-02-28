@@ -12,7 +12,7 @@ class DataParser:
     For SDE CV, set sde to True
     For ML CV, set ml to True
     """
-    VERSION = "3.0.0"
+    VERSION = "3.1.0"
 
     def __init__(self, file, vars):
         self.file = file
@@ -150,17 +150,21 @@ class DataParser:
         
         self.file.write("\\resumeSubHeadingListEnd\n\n")
     
-    def parse_publications(self):
+    def parse_publications(self, latest_k=999):
         if len(self.data["publications"]) == 0:
             return
         
         self.file.write("\n")
-        self.file.write("\\section{Publications}\n")
+        self.file.write("\\section{Recent Publications}\n")
+        self.file.write("See full list on Google Scholar.")
         self.file.write("\\resumeNumberedSubHeadingListStart\n")
 
-        for publication in self.data["publications"]:
+        i = 0
+        while i < len(self.data["publications"]) and i < latest_k:
+            publication = self.data["publications"][i]
             self.file.write(rf"\item {publication}")
             self.file.write("\n")
+            i += 1
 
         self.file.write("\\resumeNumberedSubHeadingListEnd\n\n")
     
@@ -203,6 +207,21 @@ class DataParser:
         for honor in self.data["honors"]:
             date = self._get_str_from_date(honor["date"])
             self.file.write(rf"\item {honor['title']}, {date}")
+            self.file.write("\n")
+
+        self.file.write("\\resumeSubHeadingListEnd\n\n")
+    
+    def parse_talks(self):
+        if len(self.data["talks"]) == 0:
+            return
+        
+        self.file.write("\n")
+        self.file.write("\\section{Invited Talks}\n")
+        self.file.write("\\resumeSubHeadingListStart\n")
+
+        for talk in self.data["talks"]:
+            date = self._get_str_from_date(talk["date"])
+            self.file.write(rf"\item \textbf{{{date}}}, ``\textit{{{talk['title']}}}'' at {talk['location']}")
             self.file.write("\n")
 
         self.file.write("\\resumeSubHeadingListEnd\n\n")

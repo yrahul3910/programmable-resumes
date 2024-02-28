@@ -1,5 +1,6 @@
 import subprocess
 import os
+import threading
 
 class list(list):
     def map(self, f):
@@ -17,7 +18,7 @@ from progres.utils.config import check_config_exists
 from progres.utils.io import IOWrapper
 
 
-CUR_VERSION = "3.0.0"
+CUR_VERSION = "3.1.0"
 SPECFILE_NAME = "Specfile"
 COMMANDS = [
     "VERSION",
@@ -102,12 +103,12 @@ def _main():
     parser.add_argument("--debug", "-d", action="store_true", default=False, help="Debug mode")
     sys_args = parser.parse_args()
 
-    proc = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    proc.wait()
-    EXIT_CODE = proc.returncode
-    __comm = proc.communicate()
+    __proc = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    __proc.wait()
+    EXIT_CODE = __proc.returncode
+    __comm = __proc.communicate()
     _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
-    _ = [str(x) for x in _.split('\n')]
+    _ = _.split('\n')
     specs = _
 
     configs = None
@@ -203,12 +204,12 @@ def _main():
                 for x in _lines:
                     wrapper.write_to_all(x)
             elif args.strip().endswith("py"):
-                proc = subprocess.Popen(f'cat {args}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                proc.wait()
-                EXIT_CODE = proc.returncode
-                __comm = proc.communicate()
+                __proc = subprocess.Popen(f'cat {args}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                __proc.wait()
+                EXIT_CODE = __proc.returncode
+                __comm = __proc.communicate()
                 _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
-                _ = [str(x) for x in _.split('\n')]
+                _ = _.split('\n')
                 lines = _
                 lines = [get_indent_string() + line + "\n" for line in lines]
                 
@@ -232,10 +233,10 @@ def _main():
 
     def f(config):
         print(f"Compiling config: {config}")
-        proc = subprocess.Popen(f'sleep 1 && {python_exec} {config}.py && sleep 1 && yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        proc.wait()
-        EXIT_CODE = proc.returncode
-        __comm = proc.communicate()
+        __proc = subprocess.Popen(f'sleep 1 && {python_exec} {config}.py && sleep 1 && yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        __proc.wait()
+        EXIT_CODE = __proc.returncode
+        __comm = __proc.communicate()
         _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
         _
         
@@ -245,16 +246,16 @@ def _main():
 
             raise RuntimeError(f"Failed to compile {config}.tex: failed at the {parser} step.")
 
-        proc = subprocess.Popen(f'rm {config}.aux {config}.log {config}.py {config}.out {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        proc.wait()
-        EXIT_CODE = proc.returncode
-        __comm = proc.communicate()
+        __proc = subprocess.Popen(f'rm {config}.aux {config}.log {config}.py {config}.out {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        __proc.wait()
+        EXIT_CODE = __proc.returncode
+        __comm = __proc.communicate()
         _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
         _
-        proc = subprocess.Popen(f'mkdir -p {sys_args.output} && mv {config}.pdf {sys_args.output}/', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        proc.wait()
-        EXIT_CODE = proc.returncode
-        __comm = proc.communicate()
+        __proc = subprocess.Popen(f'mkdir -p {sys_args.output} && mv {config}.pdf {sys_args.output}/', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        __proc.wait()
+        EXIT_CODE = __proc.returncode
+        __comm = __proc.communicate()
         _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
         _
 

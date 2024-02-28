@@ -8,7 +8,7 @@ class DataParser:
     """
     Template spec file for Awesome CV. Expects a `position` and `address` variable to be set.
     """
-    VERSION = "3.0.0"
+    VERSION = "3.1.0"
 
     def __init__(self, file, vars):
         self.file = file
@@ -129,9 +129,11 @@ class DataParser:
         
         self.file.write(r"\end{cventries}")
     
-    def parse_employment(self):
+    def parse_employment(self, after_date="1970-01-01"):
         if len(self.data["employment"]) == 0:
             return
+        
+        after_date = datetime.fromisoformat(after_date)
         
         self.file.write("\n")
         self.file.write(r"\cvsection{Experience}")
@@ -145,6 +147,11 @@ class DataParser:
             positions = entry["positions"]
 
             for position in positions:
+                # Check date
+                dates = self._get_str_from_dates(position["dates"])
+                if datetime.fromisoformat(position["dates"][1]) < after_date:
+                    continue
+
                 # Check tags
                 if any([self.vars.get(tag, False) for tag in position["tags"]]):
                     self.file.write(r"\cventry")
@@ -203,7 +210,7 @@ class DataParser:
         self.file.write(r"\end{cvskills}")
         self.file.write("\n")
     
-    def parse_projects(self):
+    def parse_projects(self, latest_k=999):
         if len(self.data["projects"]) == 0:
             return
         
@@ -213,8 +220,21 @@ class DataParser:
         self.file.write(r"\begin{cventries}")
         self.file.write("\n")
 
-        for entry in self.data["projects"]:
+        # Re-arrange self.data["projects"] in descending order of completion date.
+        self.data["projects"].sort(
+            key=lambda p: datetime.fromisoformat(p["dates"][1]) if p["dates"][1] is not None else datetime(3000, 1, 1),
+            reverse=True
+        )
+
+        i = 0
+        k = 0
+
+        while k < latest_k and i < len(self.data["projects"]) - 1:
+            entry = self.data["projects"][i]
+            i += 1
+
             if any([self.vars.get(tag, False) for tag in entry["tags"]]):
+                k += 1
                 self.file.write(r"\cventry")
                 self.file.write("\n")
                 self.file.write(r"{" + ", ".join(entry["skills"]) + r"}")
@@ -303,9 +323,34 @@ class DataParser:
         self.file.write(r"\end{cvhonors}")
         self.file.write("\n")
     
-    def parse_publications(self):
+    def parse_publications(self, latest_k=999):
         # Not currently supported by Awesome CV
         pass
+
+    def parse_talks(self):
+        if len(self.data["talks"]) == 0:
+            return
+        
+        self.file.write("\n")
+        self.file.write(r"\cvsection{Talks}")
+        self.file.write("\n")
+        self.file.write(r"\begin{cvhonors}")
+        self.file.write("\n")
+
+        for entry in self.data["talks"]:
+            self.file.write(r"\cvhonor")
+            self.file.write("\n")
+            self.file.write(r"{" + entry["title"] + r"}")
+            self.file.write("\n")
+            self.file.write(r"{" + entry["event"] + r"}")
+            self.file.write("\n")
+            self.file.write(r"{" + entry["location"] + r"}")
+            self.file.write("\n")
+            self.file.write(r"{" + self._get_str_from_date(entry["date"]) + r"}")
+            self.file.write("\n")
+        
+        self.file.write(r"\end{cvhonors}")
+        self.file.write("\n")
 
     def parse_service(self):
         if len(self.data["service"]) == 0:

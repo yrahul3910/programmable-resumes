@@ -48,7 +48,7 @@ progres
 
 to create your CV. `progres` accepts the following options:
 
-* `--output / -d`: The output directory. Defaults to `out/`
+* `--output / -o`: The output directory. Defaults to `out/`
 * `--debug / -d`: Enable debug mode. This prints out stack traces from stderr during compilation.
 
 ### Supported Templates

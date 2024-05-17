@@ -153,7 +153,7 @@ class DataParser:
                     continue
 
                 # Check tags
-                if any([self.vars.get(tag, False) for tag in position["tags"]]):
+                if not position["tags"] or all([self.vars.get(tag, False) for tag in position["tags"]]):
                     self.file.write(r"\cventry")
                     self.file.write("\n")
                     self.file.write(r"{" + position["position"] + r"}")
@@ -162,7 +162,7 @@ class DataParser:
                     self.file.write("\n")
                     self.file.write(r"{" + location + r"}")
                     self.file.write("\n")
-                    self.file.write(r"{" + self._get_str_from_dates(position["dates"]) + r"}{")
+                    self.file.write(r"{" + dates + r"}{")
                     self.file.write("\n")
 
                     if "details" in position and len(position["details"]) > 0:
@@ -233,7 +233,7 @@ class DataParser:
             entry = self.data["projects"][i]
             i += 1
 
-            if any([self.vars.get(tag, False) for tag in entry["tags"]]):
+            if not entry["tags"] or any([self.vars.get(tag, False) for tag in entry["tags"]]):
                 k += 1
                 self.file.write(r"\cventry")
                 self.file.write("\n")

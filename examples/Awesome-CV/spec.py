@@ -233,6 +233,9 @@ class DataParser:
             entry = self.data["projects"][i]
             i += 1
 
+            if "hidden" in entry and entry["hidden"]:
+                continue
+
             if not entry["tags"] or any([self.vars.get(tag, False) for tag in entry["tags"]]):
                 k += 1
                 self.file.write(r"\cventry")

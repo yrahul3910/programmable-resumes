@@ -6,7 +6,6 @@ class list(list):
     def map(self, f):
         return list(map(f, self))
 
-import os
 import json
 import argparse
 import multiprocessing as mp

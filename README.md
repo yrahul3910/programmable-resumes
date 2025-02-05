@@ -121,7 +121,7 @@ A `data.json` file must be defined with the following spec. Note that dates must
     "type": string
   }],
   "honors": [{
-    "date": string[],
+    "date": string[] | string,
     "location": string?,
     "details": string?,
     "title": string

@@ -6,10 +6,11 @@ class list(list):
     def map(self, f):
         return list(map(f, self))
 
-import json
 import argparse
+import json
 import multiprocessing as mp
 import multiprocessing.pool
+import sys
 
 from packaging.version import parse as parse_version
 from progres.utils.args import parse_key_value_pairs
@@ -98,10 +99,16 @@ def _main():
     global line_num, indentation, indent_type, wrapper
 
     parser = argparse.ArgumentParser(description="Progres: Programmable Resumes.")
-    parser.add_argument("--output", "-o", type=str, default="./out", help="Output directory")
+    parser.add_argument("--anon", "-a", action="store_true", default=False, help="Anonymous mode")
     parser.add_argument("--debug", "-d", action="store_true", default=False, help="Debug mode")
+    parser.add_argument("--output", "-o", type=str, default="./out", help="Output directory")
     parser.add_argument("--transpile-only", "-t", action="store_true", default=False, help="Transpile-only mode")
+    parser.add_argument("--version", "-v", action="store_true", default=False, help="Show version and exit")
     sys_args = parser.parse_args()
+
+    if sys_args.version:
+        print(f"progres version {CUR_VERSION}")
+        sys.exit(0)
 
     __proc = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     __proc.wait()
@@ -129,6 +136,9 @@ def _main():
     wrapper = IOWrapper(configs)
     parser = "pdflatex"  
     python_exec = "python3"  
+
+    for config in configs["configs"]:
+        wrapper.write_to_file(config, f"ANONYMOUS_MODE = {sys_args.anon}\n")
 
     for config in configs["configs"]:
         wrapper.write_to_file(config, f"outFile = open(\"{config}.tex\", \"w\")\n")

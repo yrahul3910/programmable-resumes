@@ -58,19 +58,32 @@ class DataParser:
         info = self.data["personalInfo"]
 
         # Split name into first and last. Split by the last space in the name.
-        name = info["name"].split(" ")
-        first_name = " ".join(name[:-1])
-        last_name = name[-1]
+        if self.vars.get("ANONYMOUS_MODE", False):
+            name = "Anonymous"
+            first_name = "Anonymous"
+            last_name = ""
+
+            address = "Address" if "address" in self.vars else ""
+            phone = "Phone" if info["contact"]["phone"] else ""
+            email = "Email" if info["contact"]["email"] else ""
+        else:
+            name = info["name"].split(" ")
+            first_name = " ".join(name[:-1])
+            last_name = name[-1]
+
+            address = self.vars.get("address", "")
+            phone = info["contact"]["phone"]
+            email = info["contact"]["email"]
 
         self.file.write(r"\name{" + first_name + "}{" + last_name + "}")
         self.file.write("\n")
         self.file.write(r"\position{" + self.vars.get("position") + r"}")
         self.file.write("\n")
-        self.file.write(r"\address{" + self.vars.get("address") + r"}")
+        self.file.write(r"\address{" + address + r"}")
         self.file.write("\n")
-        self.file.write(r"\mobile{" + info["contact"]["phone"] + r"}")
+        self.file.write(r"\mobile{" + phone + r"}")
         self.file.write("\n")
-        self.file.write(r"\email{" + info["contact"]["email"] + r"}")
+        self.file.write(r"\email{" + email + r"}")
         self.file.write("\n")
 
         supported_links = ["github", "linkedin", "googlescholar",
@@ -79,7 +92,12 @@ class DataParser:
         for item in supported_links:
             link = [x for x in info["links"]
                     if x["display"].lower().replace(" ", "") == item]
+
             if len(link) > 0:
+                url = link[0]["url"]
+                if self.vars.get("ANONYMOUS_MODE", False):
+                    url = url.split(".com")[0] + ".com"
+
                 self.file.write("\\" + item + "{" + link[0]["url"] + r"}")
 
                 if item == "googlescholar":
@@ -246,6 +264,10 @@ class DataParser:
                 self.file.write("\n")
 
                 links = [rf"\href{{{link['url']}}}{{{link['display']}}}" for link in entry["links"]]
+
+                if self.vars.get("ANONYMOUS_MODE", False):
+                    links = [link.split(".com")[0] + ".com" for link in links]
+
                 self.file.write(r"{" + ", ".join(links) + r"}")
                 self.file.write("\n")
                 self.file.write(r"{" + self._get_str_from_dates(entry["dates"]) + r"}{")

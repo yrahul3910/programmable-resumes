@@ -2,6 +2,8 @@
 
 This implements the necessary preamble and template spec file for [this MIT-licensed template](https://github.com/rajnikant7008/Latex-Resume-Template/tree/master).
 
+**Anonymous mode:** Anonymous mode anonymizes your personal information and updates the links in your personal projects to the website's canonical addresses. Because it is difficult to anonymize publications, that section is skipped instead.
+
 ## How to use
 
 Please see the accompanying `Specfile` for an example on using this template. Currently, this template supports the following parsing arguments:

@@ -100,6 +100,7 @@ def _main():
     parser = argparse.ArgumentParser(description="Progres: Programmable Resumes.")
     parser.add_argument("--output", "-o", type=str, default="./out", help="Output directory")
     parser.add_argument("--debug", "-d", action="store_true", default=False, help="Debug mode")
+    parser.add_argument("--transpile-only", "-t", action="store_true", default=False, help="Transpile-only mode")
     sys_args = parser.parse_args()
 
     __proc = subprocess.Popen(f'cat {SPECFILE_NAME}', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -232,12 +233,20 @@ def _main():
 
     def f(config):
         print(f"Compiling config: {config}")
-        __proc = subprocess.Popen(f'sleep 1 && {python_exec} {config}.py && sleep 1 && yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        __proc = subprocess.Popen(f'sleep 1 && {python_exec} {config}.py', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         __proc.wait()
         EXIT_CODE = __proc.returncode
         __comm = __proc.communicate()
         _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
         _
+
+        if not sys_args.transpile_only:
+            __proc = subprocess.Popen(f'yes "" | {parser} {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            __proc.wait()
+            EXIT_CODE = __proc.returncode
+            __comm = __proc.communicate()
+            _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
+            _
         
         if EXIT_CODE != 0 and len(STDERR.strip()) > 0:
             if sys_args.debug:
@@ -245,18 +254,21 @@ def _main():
 
             raise RuntimeError(f"Failed to compile {config}.tex: failed at the {parser} step.")
 
-        __proc = subprocess.Popen(f'rm {config}.aux {config}.log {config}.py {config}.out {config}.tex', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        __proc = subprocess.Popen(f'rm {config}.aux {config}.log {config}.py {config}.out', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         __proc.wait()
         EXIT_CODE = __proc.returncode
         __comm = __proc.communicate()
         _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
         _
-        __proc = subprocess.Popen(f'mkdir -p {sys_args.output} && mv {config}.pdf {sys_args.output}/', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        __proc.wait()
-        EXIT_CODE = __proc.returncode
-        __comm = __proc.communicate()
-        _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
-        _
+
+        if not sys_args.transpile_only:
+            __proc = subprocess.Popen(f'rm {config}.tex && mkdir -p {sys_args.output} && mv {config}.pdf {sys_args.output}/', shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            __proc.wait()
+            EXIT_CODE = __proc.returncode
+            __comm = __proc.communicate()
+            _, STDERR = __comm[0].decode('utf-8').rstrip(), __comm[1].decode('utf-8').rstrip()
+            _
+
 
     with multiprocessing.pool.ThreadPool(processes=cpu_count) as pool:
         pool.map(f, [config for config in configs["configs"].keys()])

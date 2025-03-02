@@ -54,6 +54,10 @@ We currently support the following LaTeX templates. If you would like to add you
 
 See the [documentation](./docs/index.md) for docs specific to end-users as well as template devs.
 
+## License
+
+The source code of this repository is under a permissive MIT license. The examples are distributed under the fully permissive Unlicense.
+
 ## Developer Guide
 
 This section discusses the internal working of the system. If you are not a contributor to the project, you may ignore this section.

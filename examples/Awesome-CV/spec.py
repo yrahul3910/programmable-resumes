@@ -8,6 +8,7 @@ class DataParser:
     """
     Template spec file for Awesome CV. Expects a `position` and `address` variable to be set.
     """
+
     VERSION = "3.1.0"
 
     def __init__(self, file, vars):
@@ -19,33 +20,33 @@ class DataParser:
 
         with open("data.json", "r") as f:
             self.data = json.load(f)
-        
+
         if "version" not in self.data:
             raise RuntimeError("data.json missing version")
 
         if parse_version(self.data["version"]) > parse_version(self.VERSION):
             raise RuntimeError("data.json version is newer than spec.py version")
-    
+
     def _get_str_from_date(self, date):
         try:
             return datetime.fromisoformat(date).strftime("%b %Y")
         except TypeError:
             return "Unknown"
-    
+
     def _get_str_from_dates(self, dates):
         [start, end] = dates
         try:
             start = datetime.fromisoformat(start).strftime("%b %Y")
         except TypeError:
             start = "Present"
-        
+
         try:
             end = datetime.fromisoformat(end).strftime("%b %Y")
         except TypeError:
             end = "Present"
-        
+
         return f"{start} - {end}"
-    
+
     def parse_begin(self):
         self.file.write(r"\begin{document}")
         self.file.write("\n")
@@ -86,12 +87,24 @@ class DataParser:
         self.file.write(r"\email{" + email + r"}")
         self.file.write("\n")
 
-        supported_links = ["github", "linkedin", "googlescholar",
-                           "stackoverflow", "twitter", "skype", "medium", "gitlab", "kaggle"]
+        supported_links = [
+            "github",
+            "linkedin",
+            "googlescholar",
+            "stackoverflow",
+            "twitter",
+            "skype",
+            "medium",
+            "gitlab",
+            "kaggle",
+        ]
 
         for item in supported_links:
-            link = [x for x in info["links"]
-                    if x["display"].lower().replace(" ", "") == item]
+            link = [
+                x
+                for x in info["links"]
+                if x["display"].lower().replace(" ", "") == item
+            ]
 
             if len(link) > 0:
                 url = link[0]["url"]
@@ -103,11 +116,11 @@ class DataParser:
                 if item == "googlescholar":
                     self.file.write(r"{}")
                 self.file.write("\n")
-    
+
     def parse_education(self):
         if len(self.data["education"]) == 0:
             return
-        
+
         self.file.write("\n")
         self.file.write(r"\cvsection{Education}")
         self.file.write("\n")
@@ -141,18 +154,18 @@ class DataParser:
 
                 self.file.write(r"\end{cvitems}")
                 self.file.write("\n")
-            
+
             self.file.write("}")
             self.file.write("\n")
-        
+
         self.file.write(r"\end{cventries}")
-    
+
     def parse_employment(self, after_date="1970-01-01"):
         if len(self.data["employment"]) == 0:
             return
-        
+
         after_date = datetime.fromisoformat(after_date)
-        
+
         self.file.write("\n")
         self.file.write(r"\cvsection{Experience}")
         self.file.write("\n")
@@ -171,7 +184,9 @@ class DataParser:
                     continue
 
                 # Check tags
-                if not position["tags"] or all([self.vars.get(tag, False) for tag in position["tags"]]):
+                if not position["tags"] or all(
+                    [self.vars.get(tag, False) for tag in position["tags"]]
+                ):
                     self.file.write(r"\cventry")
                     self.file.write("\n")
                     self.file.write(r"{" + position["position"] + r"}")
@@ -193,17 +208,17 @@ class DataParser:
 
                         self.file.write(r"\end{cvitems}")
                         self.file.write("\n")
-                    
+
                     self.file.write("}")
                     self.file.write("\n")
-        
+
         self.file.write(r"\end{cventries}")
         self.file.write("\n")
 
     def parse_skills(self):
         if len(self.data["skills"]) == 0:
             return
-        
+
         self.file.write("\n")
         self.file.write(r"\cvsection{Skills}")
         self.file.write("\n")
@@ -224,14 +239,14 @@ class DataParser:
             self.file.write("\n")
             self.file.write(r"{" + ", ".join(skills[skill]) + r"}")
             self.file.write("\n")
-        
+
         self.file.write(r"\end{cvskills}")
         self.file.write("\n")
-    
+
     def parse_projects(self, latest_k=999):
         if len(self.data["projects"]) == 0:
             return
-        
+
         self.file.write("\n")
         self.file.write(r"\cvsection{Projects}")
         self.file.write("\n")
@@ -240,8 +255,12 @@ class DataParser:
 
         # Re-arrange self.data["projects"] in descending order of completion date.
         self.data["projects"].sort(
-            key=lambda p: datetime.fromisoformat(p["dates"][1]) if p["dates"][1] is not None else datetime(3000, 1, 1),
-            reverse=True
+            key=lambda p: (
+                datetime.fromisoformat(p["dates"][1])
+                if p["dates"][1] is not None
+                else datetime(3000, 1, 1)
+            ),
+            reverse=True,
         )
 
         i = 0
@@ -254,7 +273,9 @@ class DataParser:
             if "hidden" in entry and entry["hidden"]:
                 continue
 
-            if not entry["tags"] or any([self.vars.get(tag, False) for tag in entry["tags"]]):
+            if not entry["tags"] or any(
+                [self.vars.get(tag, False) for tag in entry["tags"]]
+            ):
                 k += 1
                 self.file.write(r"\cventry")
                 self.file.write("\n")
@@ -263,7 +284,10 @@ class DataParser:
                 self.file.write(r"{" + entry["title"] + r"}")
                 self.file.write("\n")
 
-                links = [rf"\href{{{link['url']}}}{{{link['display']}}}" for link in entry["links"]]
+                links = [
+                    rf"\href{{{link['url']}}}{{{link['display']}}}"
+                    for link in entry["links"]
+                ]
 
                 if self.vars.get("ANONYMOUS_MODE", False):
                     links = [link.split(".com")[0] + ".com" for link in links]
@@ -283,17 +307,17 @@ class DataParser:
 
                     self.file.write(r"\end{cvitems}")
                     self.file.write("\n")
-                
+
                 self.file.write("}")
                 self.file.write("\n")
-        
+
         self.file.write(r"\end{cventries}")
         self.file.write("\n")
 
     def parse_honors(self):
         if len(self.data["honors"]) == 0:
             return
-        
+
         self.file.write("\n")
         self.file.write(r"\cvsection{Honors \& Awards}")
         self.file.write("\n")
@@ -301,11 +325,14 @@ class DataParser:
         self.file.write("\n")
 
         for entry in self.data["honors"]:
+            if entry.get("hidden", False):
+                continue
+
             self.file.write(r"\cvhonor")
             self.file.write("\n")
             self.file.write(r"{" + entry["title"] + r"}")
             self.file.write("\n")
-            
+
             if "details" in entry:
                 self.file.write(r"{" + entry["issuer"] + r"}")
             else:
@@ -319,14 +346,14 @@ class DataParser:
             self.file.write("\n")
             self.file.write(r"{" + self._get_str_from_date(entry["date"]) + r"}")
             self.file.write("\n")
-        
+
         self.file.write(r"\end{cvhonors}")
         self.file.write("\n")
 
     def parse_funding(self):
         if len(self.data["funding"]) == 0:
             return
-        
+
         self.file.write("\n")
         self.file.write(r"\cvsection{Funding}")
         self.file.write("\n")
@@ -344,10 +371,10 @@ class DataParser:
             self.file.write("\n")
             self.file.write(r"{" + self._get_str_from_date(entry["date"]) + r"}")
             self.file.write("\n")
-        
+
         self.file.write(r"\end{cvhonors}")
         self.file.write("\n")
-    
+
     def parse_publications(self, latest_k=999):
         # Not currently supported by Awesome CV
         pass
@@ -355,7 +382,7 @@ class DataParser:
     def parse_talks(self):
         if len(self.data["talks"]) == 0:
             return
-        
+
         self.file.write("\n")
         self.file.write(r"\cvsection{Talks}")
         self.file.write("\n")
@@ -373,14 +400,14 @@ class DataParser:
             self.file.write("\n")
             self.file.write(r"{" + self._get_str_from_date(entry["date"]) + r"}")
             self.file.write("\n")
-        
+
         self.file.write(r"\end{cvhonors}")
         self.file.write("\n")
 
     def parse_service(self):
         if len(self.data["service"]) == 0:
             return
-        
+
         self.file.write("\n")
         self.file.write(r"\cvsection{Service}")
         self.file.write("\n")
@@ -402,6 +429,6 @@ class DataParser:
             else:
                 self.file.write("{}")
             self.file.write("\n")
-        
+
         self.file.write(r"\end{cvhonors}")
         self.file.write("\n")

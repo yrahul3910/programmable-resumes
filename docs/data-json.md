@@ -62,7 +62,8 @@ A `data.json` file must be defined with the following spec. Note that dates must
     "date": string[] | string,
     "location": string?,
     "details": string?,
-    "title": string
+    "title": string,
+    "hidden": boolean?
   }],
   "funding": [{
     "amount": string,

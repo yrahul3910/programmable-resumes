@@ -9,7 +9,7 @@ class DataParser:
     Template spec file for Awesome CV. Expects a `position` and `address` variable to be set.
     """
 
-    VERSION = "3.1.0"
+    VERSION = "3.2.0"
 
     def __init__(self, file, vars):
         self.file = file

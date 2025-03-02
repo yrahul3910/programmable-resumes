@@ -5,6 +5,9 @@
 * Anonymous mode is now implemented, and available using the `-a` flag.
 * Docs are now a lot more comprehensive!
 * A transpile-only mode is now available using the `-t` flag.
+* Honors now support a `hidden` attribute.
+* Education now supports a `details` attribute.
+* Examples are now under the Unlicense.
 
 ## v3.0.0
 

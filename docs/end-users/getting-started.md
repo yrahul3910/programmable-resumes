@@ -52,6 +52,8 @@ The `Specfile` lets you do more advanced manipulation as well. You can use a `SE
 
 You can also use the `INCLUDE` command to include Python code. The command will process the file based on its extension. This is useful if you need to define functions or more complex logic. Within Python files that you write, you can write out to the final LaTeX file using a `outFile` object.
 
+Finally, you can also include comments in your `Specfile`. Comments begin with a `//`, and can be either at the end of a line, or be the entire line itself. However, there are no multi-line comments.
+
 ### The config file
 
 The config file is optional, and used in conjunction with the `CONFIG` command in the `Specfile`. The config file is a file named `configs.json`, that has the following structure:

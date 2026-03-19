@@ -225,6 +225,12 @@ def _main():
         print(f"Compiling config: {config}")
         `sleep 1 && {python_exec} {config}.py`
 
+        if EXIT_CODE != 0 and len(STDERR.strip()) > 0:
+            if sys_args.debug:
+                print(f"{parser} failed:\n{STDERR}")
+
+            raise RuntimeError(f"Failed to compile {config}.py: failed at the {python_exec} step.")
+
         if not sys_args.transpile_only:
             `yes "" | {parser} {config}.tex`
         

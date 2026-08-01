@@ -334,7 +334,7 @@ class DataParser:
             reverse=True,
         )
 
-        while k < latest_k and i < len(self.data["projects"]) - 1:
+        while k < latest_k and i < len(self.data["projects"]):
             project = self.data["projects"][i]
             i += 1
 
